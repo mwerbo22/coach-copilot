@@ -1,0 +1,2573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Field — Fitness App</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800;900&family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   RESET & ROOT
+═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Core palette */
+  --bg:         #0a0a0b;
+  --s1:         #111114;
+  --s2:         #161619;
+  --s3:         #1e1e23;
+  --s4:         #26262d;
+  --border:     rgba(255,255,255,0.07);
+  --border2:    rgba(255,255,255,0.04);
+  --text:       #f0f0f2;
+  --text2:      #82818c;
+  --text3:      #46454f;
+  --text4:      #272630;
+  /* Accents */
+  --lime:       #c9f13d;
+  --lime-dk:    #9bbf25;
+  --lime-dim:   rgba(201,241,61,0.11);
+  --lime-glow:  rgba(201,241,61,0.20);
+  --green:      #34d399;
+  --green-dim:  rgba(52,211,153,0.10);
+  --orange:     #fb923c;
+  --orange-dim: rgba(251,146,60,0.10);
+  --blue:       #60a5fa;
+  --blue-dim:   rgba(96,165,250,0.10);
+  --rose:       #f87171;
+  --rose-dim:   rgba(248,113,113,0.10);
+  --gold:       #d4a84b;
+  --gold-dim:   rgba(212,168,75,0.12);
+  --teal:       #4ec9b0;
+  --teal-dim:   rgba(78,201,176,0.10);
+  --purple:     #b78aff;
+  --purple-dim: rgba(183,138,255,0.10);
+  /* Typography */
+  --ff:   'Barlow', sans-serif;
+  --ffc:  'Barlow Condensed', sans-serif;
+  --ffs:  'Instrument Serif', serif;
+  --ffm:  'DM Mono', monospace;
+  /* Radii */
+  --r:    14px;
+  --rsm:  8px;
+  --rxs:  5px;
+  /* Misc */
+  --nav-h: 72px;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  font-family: var(--ff);
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════
+   APP SHELL
+═══════════════════════════════════════════════ */
+.app {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  background: var(--bg);
+}
+.phone {
+  width: 100%;
+  max-width: 390px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ── SCREEN CONTAINER ─── */
+.screens {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(24px);
+  transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  will-change: opacity, transform;
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(0);
+}
+.screen.exit-left {
+  opacity: 0;
+  transform: translateX(-24px);
+}
+
+/* ── STATUS BAR (shared) ─── */
+.status-bar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  flex-shrink: 0;
+}
+.st-time { font-size: 15px; font-weight: 600; letter-spacing: 0.01em; }
+.st-icons { display: flex; gap: 5px; align-items: center; }
+.st-icons svg { width: 15px; height: 15px; }
+
+/* ── BOTTOM NAV ─── */
+.bottom-nav {
+  height: var(--nav-h);
+  background: var(--s1);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 8px 8px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 50;
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 0 2px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  transition: all 0.18s;
+  border-radius: var(--rsm);
+  position: relative;
+}
+.nav-item svg {
+  width: 22px; height: 22px;
+  stroke: var(--text3);
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.18s;
+}
+.nav-item span {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text3);
+  transition: color 0.18s;
+}
+.nav-item.active svg  { stroke: var(--lime); }
+.nav-item.active span { color: var(--lime); }
+.nav-dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--lime);
+  position: absolute;
+  bottom: 2px;
+  opacity: 0;
+  transition: opacity 0.18s;
+}
+.nav-item.active .nav-dot { opacity: 1; }
+
+/* scroll helper */
+.scr { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; }
+.scr::-webkit-scrollbar { display: none; }
+
+
+/* ═══════════════════════════════════════════════
+   SCREEN 1 — HOME (redesigned)
+═══════════════════════════════════════════════ */
+
+/* Greeting bar */
+.h-top {
+  padding: 6px 20px 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.h-greeting-left {}
+.h-date {
+  font-family: var(--ffm);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 4px;
+}
+.h-name {
+  font-family: var(--ffs);
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--text);
+}
+.h-name em { font-style: italic; color: var(--lime); }
+
+/* Coach attribution pill */
+.h-coach-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 10px 6px 8px;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.h-coach-av {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4fa3ff, #b78aff);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7.5px; font-weight: 800; color: white;
+  font-family: var(--ffc);
+  flex-shrink: 0;
+}
+.h-coach-label {
+  font-family: var(--ffm);
+  font-size: 9.5px;
+  color: var(--text3);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.h-coach-label strong { color: var(--text2); font-weight: 500; }
+
+/* ── TODAY'S SESSION CARD ── */
+.h-today-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  margin: 0 14px 10px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.2s;
+}
+.h-today-card:active { border-color: rgba(201,241,61,0.3); transform: scale(0.995); }
+.h-today-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--lime) 0%, rgba(201,241,61,0.25) 60%, transparent 100%);
+}
+
+.h-today-body { padding: 18px 18px 16px; }
+
+/* Phase/block context */
+.h-block-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 11px;
+}
+.h-block-pill {
+  font-family: var(--ffm);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--lime-dk);
+  background: var(--lime-dim);
+  border: 1px solid rgba(201,241,61,0.18);
+  border-radius: 4px;
+  padding: 3px 8px;
+}
+.h-block-sep {
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: var(--text4);
+  flex-shrink: 0;
+}
+.h-phase-label {
+  font-family: var(--ffm);
+  font-size: 9.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+
+/* Session name & focus */
+.h-session-title {
+  font-family: var(--ffc);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 0.98;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+.h-session-focus {
+  font-size: 13px;
+  color: var(--text2);
+  font-weight: 400;
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+.h-session-focus em { font-style: italic; color: var(--text); font-weight: 500; }
+
+/* Meta row: time · sections */
+.h-session-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.h-meta-txt {
+  font-family: var(--ffm);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--text3);
+}
+.h-meta-sep { color: var(--text4); font-size: 8px; }
+.h-sec-pill {
+  font-family: var(--ffc);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.hsp-prep  { background: rgba(52,211,153,0.09);  color: var(--green);  border: 1px solid rgba(52,211,153,0.16); }
+.hsp-str   { background: rgba(96,165,250,0.09);  color: var(--blue);   border: 1px solid rgba(96,165,250,0.16); }
+.hsp-cond  { background: rgba(251,146,60,0.09);  color: var(--orange); border: 1px solid rgba(251,146,60,0.16); }
+
+/* Coach note strip */
+.h-coach-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(255,255,255,0.025);
+  border-top: 1px solid var(--border2);
+  padding: 11px 18px;
+}
+.h-cn-av {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4fa3ff, #b78aff);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 800; color: white;
+  font-family: var(--ffc);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.h-cn-body { flex: 1; }
+.h-cn-from {
+  font-family: var(--ffm);
+  font-size: 9px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 3px;
+}
+.h-cn-msg {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.55;
+  font-style: italic;
+}
+.h-cn-msg strong { color: var(--text); font-style: normal; font-weight: 600; }
+
+/* Start CTA */
+.h-start-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: calc(100% - 36px);
+  margin: 0 18px 18px;
+  height: 52px;
+  background: var(--lime);
+  border: none;
+  border-radius: 12px;
+  font-family: var(--ffc);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #0a0a0b;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(201,241,61,0.16);
+  transition: all 0.18s;
+  position: relative; overflow: hidden;
+}
+.h-start-btn::after { content:''; position:absolute;inset:0;background:rgba(0,0,0,0);transition:background .15s; }
+.h-start-btn:active::after { background:rgba(0,0,0,0.1); }
+.h-start-btn svg { width: 16px; height: 16px; stroke: #0a0a0b; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; position:relative;z-index:1; }
+.h-start-btn span { position:relative;z-index:1; }
+
+/* ── WEEK AT A GLANCE ── */
+.h-week-card {
+  margin: 0 14px 10px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px 15px;
+}
+.h-week-hd {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 11px;
+}
+.h-week-lbl {
+  font-family: var(--ffm);
+  font-size: 10px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.h-week-frac {
+  font-family: var(--ffm);
+  font-size: 11px;
+  color: var(--text3);
+}
+.h-week-frac span { color: var(--lime); }
+.h-day-pips {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+.h-pip {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  transition: background 0.3s;
+}
+.h-pip-done    { background: var(--lime); }
+.h-pip-today   { background: var(--text); box-shadow: 0 0 6px rgba(240,240,242,0.25); }
+.h-pip-rest    { background: var(--s4); border: 1px dashed rgba(255,255,255,0.05); }
+.h-pip-next    { background: var(--s3); }
+.h-day-labels {
+  display: flex;
+  gap: 5px;
+}
+.h-day-lbl {
+  flex: 1;
+  font-family: var(--ffm);
+  font-size: 8.5px;
+  letter-spacing: 0.05em;
+  color: var(--text4);
+  text-align: center;
+  text-transform: uppercase;
+}
+.h-day-lbl.today { color: var(--text2); }
+
+/* ── RECENT SESSIONS ── */
+.h-sessions-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 8px;
+}
+.h-sessions-lbl {
+  font-family: var(--ffm);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.h-sessions-link {
+  font-size: 12px;
+  color: var(--text3);
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.h-sessions-link:hover { color: var(--lime); }
+
+.h-session {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  margin: 0 14px 6px;
+}
+.h-session:hover { border-color: rgba(255,255,255,0.1); }
+.h-session-icon {
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.h-session-info { flex: 1; min-width: 0; }
+.h-session-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.h-session-meta {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: var(--ffm);
+  letter-spacing: 0.02em;
+}
+.h-session-badge {
+  font-family: var(--ffm);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.hsb-done { background: rgba(52,211,153,0.08); color: var(--green); border: 1px solid rgba(52,211,153,0.14); }
+.hsb-pr   { background: rgba(212,168,75,0.09); color: var(--gold);  border: 1px solid rgba(212,168,75,0.18); }
+.hsb-skip { background: var(--s3); color: var(--text3); border: 1px solid var(--border); }
+
+
+/* ═══════════════════════════════════════════════
+   SCREEN 2 — WORKOUT (block-aware rebuild)
+═══════════════════════════════════════════════ */
+
+/* ── Shared chrome ── */
+#screen-workout .w-nav {
+  padding: 4px 20px 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.w-nav-back {
+  width: 34px; height: 34px;
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.w-nav-back svg { width: 15px; height: 15px; stroke: var(--text2); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.w-nav-center { flex: 1; text-align: center; }
+.w-nav-session { font-family: var(--ffm); font-size: 10px; letter-spacing: 0.12em; color: var(--text3); text-transform: uppercase; margin-bottom: 1px; }
+.w-nav-title { font-family: var(--ffc); font-size: 18px; font-weight: 800; letter-spacing: 0; }
+
+/* Segmented block progress */
+.w-block-progress {
+  display: flex;
+  gap: 4px;
+  padding: 0 20px 12px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.w-bp-seg {
+  height: 3px;
+  border-radius: 2px;
+  flex: 1;
+  transition: background 0.4s ease;
+  cursor: pointer;
+}
+.w-bp-seg.done    { background: var(--lime); }
+.w-bp-seg.active  { background: var(--text); box-shadow: 0 0 6px rgba(240,240,242,0.2); }
+.w-bp-seg.pending { background: var(--s4); }
+.w-bp-seg.prep    { }
+.w-bp-seg.strength{ }
+.w-bp-seg.conditioning{ }
+
+/* elapsed timer pill */
+.w-timer-pill {
+  margin: 0 20px 14px;
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  padding: 8px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.w-timer-left { display: flex; align-items: center; gap: 8px; }
+.w-timer-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--lime);
+  box-shadow: 0 0 5px var(--lime-glow);
+  animation: timerGlow 1.8s ease-in-out infinite;
+}
+@keyframes timerGlow { 0%,100%{opacity:1;box-shadow:0 0 6px var(--lime-glow)}50%{opacity:.5;box-shadow:0 0 12px var(--lime)} }
+.w-timer-lbl { font-size: 11px; color: var(--text3); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.w-timer-val { font-family: var(--ffc); font-size: 20px; font-weight: 800; letter-spacing: 0.04em; }
+.w-timer-pause {
+  width: 28px; height: 28px; background: var(--s3); border: 1px solid var(--border);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.w-timer-pause svg { width: 10px; height: 10px; fill: var(--text2); }
+
+/* ── BLOCK HEADER (appears above each section in the scroll) ── */
+.block-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 0 10px;
+}
+.bh-pip {
+  width: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  align-self: stretch;
+  min-height: 28px;
+}
+.bh-pip-prep  { background: var(--green); }
+.bh-pip-str   { background: var(--blue); }
+.bh-pip-cond  { background: var(--orange); }
+.bh-text { flex: 1; }
+.bh-eyebrow {
+  font-family: var(--ffm);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 2px;
+}
+.bh-title {
+  font-family: var(--ffc);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+.bh-badge {
+  font-family: var(--ffc);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.bh-badge-prep  { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(52,211,153,.2); }
+.bh-badge-str   { background: var(--blue-dim);   color: var(--blue);   border: 1px solid rgba(96,165,250,.2); }
+.bh-badge-cond  { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(251,146,60,.2); }
+
+.block-divider { height: 1px; background: var(--border2); margin: 0 0 10px; }
+
+/* ── PREP BLOCK ── */
+.prep-item {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 13px 15px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: background 0.15s, border-color 0.15s;
+  margin-bottom: 7px;
+}
+.prep-item::before { content:''; position:absolute;left:0;top:0;bottom:0;width:3px;opacity:0;transition:opacity .2s;border-radius:0 2px 2px 0; }
+.prep-item.done::before { opacity:1; background: var(--green); }
+.prep-item.done { background: rgba(52,211,153,0.04); border-color: rgba(52,211,153,0.15); }
+.prep-chk {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1.5px solid var(--border); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.18s; background: transparent;
+}
+.prep-item.done .prep-chk { background: var(--green); border-color: var(--green); }
+.prep-chk svg { width: 11px; height: 11px; stroke: var(--bg); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0; transition: opacity .18s; }
+.prep-item.done .prep-chk svg { opacity: 1; }
+.prep-body { flex: 1; }
+.prep-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; line-height: 1.2; }
+.prep-item.done .prep-name { color: var(--text2); text-decoration: line-through; text-decoration-color: var(--text3); }
+.prep-det { font-size: 11px; color: var(--text3); font-family: var(--ffm); }
+.prep-rounds-badge {
+  font-family: var(--ffm);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text3);
+  background: var(--s3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+.prep-item.done .prep-rounds-badge { background: var(--green-dim); color: var(--green); border-color: rgba(52,211,153,.2); }
+
+/* Prep block summary note */
+.prep-note {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: var(--rsm);
+  padding: 10px 14px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--text3);
+  font-style: italic;
+}
+.prep-note svg { width: 14px; height: 14px; stroke: var(--text3); fill: none; stroke-width: 1.8; stroke-linecap: round; flex-shrink: 0; }
+
+/* ── STRENGTH BLOCK ── */
+.str-card {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  transition: border-color 0.2s;
+  position: relative;
+  margin-bottom: 8px;
+}
+.str-card::before { content:''; position:absolute;left:0;top:0;bottom:0;width:3px;opacity:0;transition:opacity .2s; }
+.str-card.s-active::before  { opacity:1; background: var(--blue); }
+.str-card.s-done::before    { opacity:1; background: var(--lime); }
+.str-card.s-active { border-color: rgba(96,165,250,.25); }
+.str-card.s-done   { border-color: rgba(201,241,61,.18); }
+
+.sc-top { padding: 13px 15px 11px; display: flex; align-items: flex-start; gap: 9px; }
+.sc-ltr {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: var(--blue-dim); border: 1px solid rgba(96,165,250,.15);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ffc); font-size: 13px; font-weight: 800; color: var(--blue); flex-shrink: 0;
+}
+.str-card.s-done .sc-ltr { background: var(--lime-dim); border-color: rgba(201,241,61,.2); color: var(--lime); }
+.sc-main { flex: 1; min-width: 0; }
+.sc-name { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 4px; }
+.sc-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.sc-tag { font-family: var(--ffc); font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; letter-spacing: 0.05em; text-transform: uppercase; }
+.stag-sets   { background: var(--blue-dim);  color: var(--blue);  border: 1px solid rgba(96,165,250,.2); }
+.stag-reps   { background: var(--blue-dim);  color: var(--blue);  border: 1px solid rgba(96,165,250,.12); opacity:.8; }
+.stag-wt     { background: var(--s4); color: var(--text2); border: 1px solid var(--border); }
+.sc-ring {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ffc); font-size: 10px; font-weight: 700; color: var(--text3);
+  flex-shrink: 0; transition: all .22s;
+}
+.str-card.s-done .sc-ring { background: var(--lime); border-color: var(--lime); color: var(--bg); }
+
+/* Target / Last / Best row */
+.sc-div { height: 1px; background: var(--border2); margin: 0 15px; }
+.sc-bot { padding: 10px 15px; display: flex; align-items: center; }
+.sc-stat { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.sc-stat-lbl { font-size: 9.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
+.sc-stat-val { font-family: var(--ffc); font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: 0.01em; line-height: 1.1; }
+.sc-stat-sub { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.sc-stat-sub.up   { color: var(--lime); font-weight: 600; }
+.sc-stat-sub.down { color: var(--rose); font-weight: 600; }
+.sc-vdiv { width: 1px; height: 32px; background: var(--border); margin: 0 10px; flex-shrink: 0; }
+
+/* Set bubbles */
+.sc-sets { padding: 0 15px 13px; display: flex; gap: 7px; }
+.set-bub {
+  flex: 1; height: 34px; border-radius: var(--rsm);
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ffc); font-size: 12px; font-weight: 700; color: var(--text3);
+  cursor: pointer; transition: all .15s; user-select: none;
+}
+.set-bub.logged     { background: var(--lime-dim); border-color: rgba(201,241,61,.3); color: var(--lime); }
+.set-bub.active-set { border-color: var(--blue); color: var(--blue); background: rgba(96,165,250,.05); }
+
+/* ── CONDITIONING BLOCK ── */
+/* Big EMOM / interval card */
+.cond-hero-card {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+/* Format banner */
+.cond-format-banner {
+  background: var(--orange-dim);
+  border-bottom: 1px solid rgba(251,146,60,.18);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cfb-format {
+  font-family: var(--ffc);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--orange);
+  flex: 1;
+}
+.cfb-duration {
+  font-family: var(--ffm);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.cfb-duration-lbl {
+  font-family: var(--ffm);
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 0.08em;
+  text-align: right;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+/* Interval display — 40s / 20s etc */
+.cond-interval-display {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid var(--border2);
+}
+.cid-half {
+  flex: 1;
+  text-align: center;
+}
+.cid-label {
+  font-family: var(--ffm);
+  font-size: 9.5px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.cid-label.work { color: var(--orange); }
+.cid-label.rest { color: var(--teal); }
+.cid-val {
+  font-family: var(--ffc);
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.cid-val.work { color: var(--orange); }
+.cid-val.rest { color: var(--teal); }
+.cid-unit {
+  font-family: var(--ffm);
+  font-size: 11px;
+  margin-top: 2px;
+}
+.cid-unit.work { color: rgba(251,146,60,0.5); }
+.cid-unit.rest { color: rgba(61,217,193,0.5); }
+.cid-divider {
+  width: 1px;
+  height: 48px;
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 0 8px;
+}
+
+/* EMOM countdown timer */
+.cond-emom-timer {
+  padding: 16px 16px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--border2);
+}
+.cet-label {
+  font-family: var(--ffm);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 6px;
+}
+.cet-clock {
+  font-family: var(--ffc);
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 4px;
+  transition: color 0.3s;
+}
+.cet-clock.warning { color: var(--orange); }
+.cet-clock.danger  { color: var(--rose); }
+.cet-minute-label {
+  font-family: var(--ffm);
+  font-size: 10.5px;
+  color: var(--text3);
+  letter-spacing: 0.05em;
+}
+.cet-progress-track {
+  height: 2px;
+  background: var(--s4);
+  border-radius: 2px;
+  margin: 10px 0 0;
+  overflow: hidden;
+}
+.cet-progress-fill {
+  height: 100%;
+  background: var(--orange);
+  border-radius: 2px;
+  transition: width 1s linear;
+}
+
+/* Timer controls */
+.cond-timer-controls {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border2);
+}
+.ctc-btn {
+  flex: 1;
+  height: 40px;
+  border-radius: var(--rsm);
+  border: none;
+  font-family: var(--ffc);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all 0.15s;
+}
+.ctc-btn svg { width: 13px; height: 13px; fill: currentColor; flex-shrink: 0; }
+.ctc-start { background: var(--orange); color: #0a0a0b; }
+.ctc-start:hover { background: #ffaa55; }
+.ctc-pause { background: var(--s3); color: var(--text2); border: 1px solid var(--border); }
+.ctc-pause:hover { background: var(--s4); color: var(--text); }
+.ctc-reset { background: var(--s3); color: var(--text2); border: 1px solid var(--border); flex: 0 0 40px; }
+.ctc-reset:hover { background: var(--s4); color: var(--text); }
+
+/* Exercise rows inside cond block */
+.cond-exercises { padding: 8px 0 4px; }
+.cond-ex-row {
+  padding: 9px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border2);
+}
+.cond-ex-row:last-child { border-bottom: none; }
+.cer-marker {
+  font-family: var(--ffm);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--orange);
+  letter-spacing: 0.06em;
+  width: 36px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+.cer-name {
+  flex: 1;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+.cer-val {
+  font-family: var(--ffc);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text2);
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+/* Rounds tracker for cond */
+.cond-rounds {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--border2);
+}
+.cr-label {
+  font-family: var(--ffm);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  flex: 1;
+}
+.cr-bubbles { display: flex; gap: 6px; }
+.cr-bub {
+  width: 30px; height: 30px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ffc);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+.cr-bub.done { background: var(--orange-dim); border-color: rgba(251,146,60,.3); color: var(--orange); }
+.cr-bub.active { border-color: var(--orange); color: var(--orange); }
+
+/* ── CTA FOOTER ── */
+.w-cta-bar {
+  padding: 10px 18px 18px;
+  background: linear-gradient(to top, var(--bg) 60%, transparent);
+  display: flex; flex-direction: column; gap: 6px;
+  flex-shrink: 0;
+}
+.w-cta-main {
+  width: 100%; height: 54px; border-radius: 14px;
+  font-family: var(--ffc); font-size: 17px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all .18s; position: relative; overflow: hidden;
+}
+.w-cta-main.cta-prep     { background: var(--green);  color: #0a0a0b; box-shadow: 0 4px 20px rgba(52,211,153,.2); }
+.w-cta-main.cta-strength { background: var(--lime);   color: #0a0a0b; box-shadow: 0 4px 20px rgba(201,241,61,.2); }
+.w-cta-main.cta-cond     { background: var(--orange); color: #0a0a0b; box-shadow: 0 4px 20px rgba(251,146,60,.2); }
+.w-cta-main::after { content:''; position:absolute;inset:0;background:rgba(0,0,0,0);transition:background .15s; }
+.w-cta-main:active::after { background:rgba(0,0,0,.12); }
+.w-cta-main svg { width: 16px; height: 16px; stroke: #0a0a0b; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; position:relative;z-index:1; }
+.w-cta-main span { position:relative;z-index:1; }
+.w-cta-sub {
+  background: transparent; border: none;
+  font-family: var(--ff); font-size: 12px; font-weight: 600;
+  color: var(--text3); cursor: pointer; letter-spacing: 0.04em; text-align: center; padding: 3px;
+}
+.w-cta-sub:hover { color: var(--text2); }
+
+/* block type indicator pill in CTA area */
+.w-block-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 0 4px;
+}
+.w-bi-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.w-bi-label { font-family: var(--ffm); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
+
+
+/* ═══════════════════════════════════════════════
+   SCREEN 3 — POST-WORKOUT LOG
+═══════════════════════════════════════════════ */
+#screen-log .log-nav {
+  padding: 4px 20px 8px;
+  display: flex; align-items: center; gap: 12px;
+}
+.log-close {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--s2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+}
+.log-close svg { width: 14px; height: 14px; stroke: var(--text2); fill: none; stroke-width: 2; stroke-linecap: round; }
+.log-info { flex: 1; }
+.log-eyebrow { font-family: var(--ffm); font-size: 10px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--text3); margin-bottom: 1px; }
+.log-heading { font-family: var(--ffc); font-size: 20px; font-weight: 800; letter-spacing: -0.01em; }
+.log-timer-pill {
+  font-family: var(--ffm); font-size: 13px; color: var(--text2);
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 12px;
+  display: flex; align-items: center; gap: 5px; flex-shrink: 0;
+}
+.log-timer-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); animation: timerGlow 2s ease-in-out infinite; }
+
+/* Step dots */
+.log-dots {
+  padding: 6px 20px 12px;
+  display: flex; gap: 4px;
+}
+.log-dot { height: 3px; border-radius: 2px; background: var(--s4); transition: all 0.3s ease; flex: 1; }
+.log-dot.ld-done    { background: var(--lime); }
+.log-dot.ld-current { background: var(--text); flex: 2; }
+
+/* Card stage */
+.log-stage { flex: 1; overflow: hidden; position: relative; padding: 0 14px; }
+.log-card-stack { position: relative; }
+.log-card {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  position: absolute; width: 100%; top: 0;
+  transition: transform .35s cubic-bezier(.34,1.2,.64,1), opacity .3s ease;
+  transform-origin: center bottom;
+  will-change: transform, opacity;
+}
+.log-card[data-depth="0"] { transform: translateY(0) scale(1); opacity: 1; z-index: 3; position: relative; }
+.log-card[data-depth="1"] { transform: translateY(9px) scale(0.97); opacity: .6; z-index: 2; }
+.log-card[data-depth="2"] { transform: translateY(16px) scale(0.94); opacity: .3; z-index: 1; }
+.log-card.lc-exit-r { transform: translateX(110%) rotate(6deg) !important; opacity: 0 !important; transition: transform .3s cubic-bezier(.55,0,1,.45), opacity .22s ease !important; }
+.log-card.lc-exit-l { transform: translateX(-110%) rotate(-6deg) !important; opacity: 0 !important; transition: transform .3s cubic-bezier(.55,0,1,.45), opacity .22s ease !important; }
+
+.lc-eyebrow { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 0; }
+.lc-idx { font-family: var(--ffm); font-size: 11px; color: var(--text3); letter-spacing: .04em; }
+.lc-badge { font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; padding: 2px 9px; border-radius: 20px; }
+.lcb-up   { background: var(--lime-dim); color: var(--lime-dk); border: 1px solid rgba(201,241,61,.2); }
+.lcb-same { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(96,165,250,.2); }
+.lcb-pr   { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(212,168,75,.2); }
+
+.lc-name { font-family: var(--ffc); font-size: 22px; font-weight: 800; letter-spacing: -0.01em; padding: 8px 16px 0; }
+.lc-stats {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px; margin: 12px 16px 0;
+  background: var(--s4); border-radius: var(--rsm); overflow: hidden;
+}
+.lcs { background: var(--s3); padding: 9px 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+.lcs.hi { background: var(--s4); }
+.lcs-lbl { font-size: 9.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); }
+.lcs-val { font-family: var(--ffm); font-size: 16px; color: var(--text); line-height: 1.1; }
+.lcs-sub { font-size: 10px; color: var(--text3); font-weight: 500; }
+.lcs-sub.up   { color: var(--lime); font-weight: 600; }
+.lcs-sub.down { color: var(--rose); font-weight: 600; }
+
+.lc-result {
+  margin: 10px 16px 0;
+  background: var(--lime-dim); border: 1.5px solid rgba(201,241,61,.25);
+  border-radius: var(--rsm); padding: 10px 12px;
+  display: flex; align-items: center; gap: 9px;
+}
+.lc-result-icon {
+  width: 30px; height: 30px; background: var(--lime); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.lc-result-icon svg { width: 13px; height: 13px; stroke: #0a0a0b; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.lc-result-label { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--lime-dk); margin-bottom: 1px; }
+.lc-result-val { font-family: var(--ffm); font-size: 14px; color: var(--text); }
+.lc-edit-btn {
+  font-size: 11px; font-weight: 600; color: var(--text2);
+  background: var(--s3); border: 1px solid var(--border);
+  border-radius: var(--rxs); padding: 5px 9px; cursor: pointer;
+  flex-shrink: 0; transition: all .14s; font-family: var(--ff);
+}
+.lc-edit-btn:hover { border-color: var(--text2); color: var(--text); }
+
+/* inline edit */
+.lc-inline-edit { margin: 10px 16px 0; background: var(--s3); border: 1.5px solid var(--border); border-radius: var(--rsm); padding: 11px 12px; display: none; }
+.lc-inline-edit.open { display: block; }
+.lce-lbl { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+.lce-fields { display: flex; gap: 7px; margin-bottom: 9px; }
+.lce-field { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.lce-field label { font-size: 9.5px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text3); }
+.lce-field input { width:100%;font-family:var(--ffm);font-size:17px;color:var(--text);background:var(--s4);border:1.5px solid var(--border);border-radius:var(--rxs);padding:7px 8px;outline:none;text-align:center;transition:border-color .14s;-moz-appearance:textfield; }
+.lce-field input::-webkit-outer-spin-button,.lce-field input::-webkit-inner-spin-button{-webkit-appearance:none}
+.lce-field input:focus { border-color: var(--text2); }
+.lce-steppers { display: flex; gap: 3px; margin-top: 3px; }
+.lce-step { flex:1;height:26px;background:var(--s4);border:1px solid var(--border);border-radius:4px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--ff);transition:background .12s; }
+.lce-step:active { background: var(--border); }
+.lce-done-row { display: flex; justify-content: flex-end; }
+.lce-done { font-family: var(--ff); font-size: 12px; font-weight: 700; color: var(--bg); background: var(--text); border: none; border-radius: var(--rxs); padding: 7px 16px; cursor: pointer; transition: background .14s; letter-spacing: .02em; }
+
+/* note chips */
+.lc-notes { display: flex; gap: 5px; margin: 10px 16px 0; flex-wrap: wrap; }
+.note-chip {
+  font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 20px;
+  border: 1.5px solid var(--border); background: var(--s3); color: var(--text2);
+  cursor: pointer; transition: all .14s; user-select: none; white-space: nowrap;
+}
+.note-chip.sel { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+/* action row */
+.lc-actions { display: grid; grid-template-columns: 1fr 2.2fr; gap: 9px; padding: 12px 16px 16px; }
+.lc-skip {
+  height: 52px; background: var(--s3); border: 1.5px solid var(--border);
+  border-radius: var(--rsm); font-family: var(--ff); font-size: 13px; font-weight: 700;
+  color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;
+  transition: all .14s;
+}
+.lc-skip svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.lc-confirm {
+  height: 52px; background: var(--text); border: none;
+  border-radius: var(--rsm); font-family: var(--ff); font-size: 17px; font-weight: 700;
+  color: var(--bg); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px;
+  transition: all .18s; position: relative; overflow: hidden;
+}
+.lc-confirm::after { content:''; position:absolute;inset:0;background:var(--lime);transform:scaleX(0);transform-origin:left;transition:transform .3s ease; }
+.lc-confirm.flash::after { transform: scaleX(1); }
+.lc-confirm span,.lc-confirm svg { position:relative;z-index:1;transition:color .2s; }
+.lc-confirm.flash span,.lc-confirm.flash svg { color: #0a0a0b; stroke: #0a0a0b; }
+.lc-confirm svg { width: 17px; height: 17px; stroke: var(--bg); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Done screen */
+.log-done {
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  flex: 1; padding: 20px 24px 32px; text-align: center;
+}
+.log-done.visible { display: flex; }
+.log-done-ring {
+  width: 72px; height: 72px; border-radius: 50%; background: var(--s2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
+  animation: popIn .45s cubic-bezier(.34,1.4,.64,1) both;
+}
+@keyframes popIn { from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1} }
+.log-done-ring svg { width: 28px; height: 28px; stroke: var(--lime); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.log-done-title { font-family: var(--ffs); font-size: 28px; font-style: italic; color: var(--text); letter-spacing: -0.02em; margin-bottom: 6px; }
+.log-done-sub { font-size: 14px; color: var(--text2); margin-bottom: 28px; line-height: 1.5; }
+.log-done-stats { width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-bottom: 24px; }
+.lds { background: var(--s2); border: 1px solid var(--border); border-radius: var(--rsm); padding: 12px 8px; }
+.lds-num { font-family: var(--ffc); font-size: 24px; font-weight: 800; color: var(--text); margin-bottom: 3px; }
+.lds-lbl { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); }
+.log-done-cta {
+  width: 100%; height: 52px; background: var(--text); border: none; border-radius: var(--rsm);
+  font-family: var(--ff); font-size: 16px; font-weight: 700; color: var(--bg); cursor: pointer; transition: background .15s;
+  letter-spacing: .01em;
+}
+.log-done-cta:active { background: var(--text2); }
+
+
+/* ═══════════════════════════════════════════════
+   SCREEN 4 — PROGRESS
+═══════════════════════════════════════════════ */
+#screen-progress .p-nav {
+  padding: 4px 22px 14px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+}
+.p-nav-title { font-family: var(--ffs); font-size: 28px; letter-spacing: -0.02em; line-height: 1; }
+.p-nav-title em { font-style: italic; color: var(--gold); }
+.p-period-toggle {
+  display: flex; background: var(--s2); border: 1px solid var(--border); border-radius: 20px; padding: 3px; gap: 2px;
+}
+.p-period-btn {
+  font-family: var(--ffm); font-size: 10px; font-weight: 500; padding: 5px 9px; border-radius: 16px;
+  border: none; cursor: pointer; color: var(--text2); background: transparent; letter-spacing: .04em; transition: all .18s;
+}
+.p-period-btn.active { background: var(--s3); color: var(--text); border: 1px solid var(--border); }
+.p-eyebrow { font-family: var(--ffm); font-size: 10px; letter-spacing: .10em; text-transform: uppercase; color: var(--text3); margin-bottom: 3px; }
+
+/* Hero row */
+.p-hero-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 9px; }
+.p-hero { background: var(--s2); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 14px 12px; position: relative; overflow: hidden; }
+.p-hero::before { content:''; position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--r) var(--r) 0 0; }
+.ph-gold::before { background: linear-gradient(90deg, var(--gold), transparent); }
+.ph-teal::before { background: linear-gradient(90deg, var(--teal), transparent); }
+.p-hero-lbl { font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--text2); margin-bottom: 5px; }
+.p-hero-val { font-family: var(--ffs); font-size: 32px; font-weight: 400; line-height: 1; letter-spacing: -0.02em; margin-bottom: 3px; }
+.ph-gold .p-hero-val { color: var(--gold); }
+.ph-teal .p-hero-val { color: var(--teal); }
+.p-hero-unit { font-family: var(--ffm); font-size: 10px; color: var(--text2); margin-bottom: 6px; }
+.p-hero-delta { font-size: 11px; font-weight: 600; color: var(--teal); }
+
+/* Chart card */
+.p-chart-card { background: var(--s2); border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 9px; overflow: hidden; }
+.p-chart-hd { padding: 14px 16px 0; display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 3px; }
+.p-chart-title { font-family: var(--ffs); font-size: 17px; letter-spacing: -0.02em; color: var(--text); }
+.p-chart-cur { font-family: var(--ffm); font-size: 16px; color: var(--text); line-height: 1; margin-bottom: 2px; text-align: right; }
+.p-chart-chg { font-size: 11px; font-weight: 600; text-align: right; color: var(--teal); }
+.p-chart-svg-wrap { padding: 8px 0 0; position: relative; }
+.p-chart-svg { width: 100%; display: block; overflow: visible; }
+.p-chart-xlabels { display: flex; justify-content: space-between; padding: 4px 16px 12px; }
+.p-chart-xlabel { font-family: var(--ffm); font-size: 9.5px; color: var(--text3); letter-spacing: .04em; }
+.p-chart-legend { display: flex; gap: 12px; padding: 0 16px 12px; border-top: 1px solid var(--border2); margin-top: 3px; padding-top: 9px; }
+.p-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+.p-legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+/* PR bars */
+.p-streak-card { background: var(--s2); border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 9px; padding: 14px 16px 14px; }
+.p-streak-hd { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+.p-streak-title { font-family: var(--ffs); font-size: 16px; color: var(--text); letter-spacing: -0.01em; }
+.p-streak-sub { font-family: var(--ffm); font-size: 10px; color: var(--text3); }
+.p-pr-bars { display: flex; gap: 4px; align-items: flex-end; height: 38px; }
+.p-pr-bar { flex: 1; border-radius: 3px 3px 0 0; min-height: 2px; transition: height .5s cubic-bezier(.34,1.2,.64,1); }
+.p-pr-bar.hit  { background: var(--gold); }
+.p-pr-bar.miss { background: var(--s4); }
+.p-pr-wlbls { display: flex; justify-content: space-between; margin-top: 5px; }
+.p-pr-wlbl { flex: 1; text-align: center; font-family: var(--ffm); font-size: 8.5px; color: var(--text3); }
+
+/* Mobility grid */
+.p-mob-section { padding: 0 16px 14px; }
+.p-mob-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.p-mob-item { display: flex; flex-direction: column; gap: 4px; }
+.p-mob-label { font-size: 11px; color: var(--text2); font-weight: 500; }
+.p-mob-track { height: 4px; background: var(--s4); border-radius: 3px; overflow: hidden; }
+.p-mob-fill { height: 100%; border-radius: 3px; background: var(--teal); transition: width 1s cubic-bezier(.34,1,.64,1); }
+.p-mob-fill.w { background: var(--rose); }
+.p-mob-fill.m { background: var(--gold); }
+.p-mob-score { font-family: var(--ffm); font-size: 10px; color: var(--text3); align-self: flex-end; }
+
+/* Lifts table */
+.p-lifts-card { background: var(--s2); border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 9px; overflow: hidden; }
+.p-lifts-hd { padding: 14px 16px 10px; display: flex; align-items: baseline; justify-content: space-between; }
+.p-lifts-title { font-family: var(--ffs); font-size: 16px; color: var(--text); letter-spacing: -0.01em; }
+.p-lifts-sub { font-family: var(--ffm); font-size: 10px; color: var(--text3); letter-spacing: .05em; }
+.p-lift-row { padding: 10px 16px; display: flex; align-items: center; border-top: 1px solid var(--border2); }
+.p-lift-rank { font-family: var(--ffm); font-size: 10px; color: var(--text3); width: 20px; flex-shrink: 0; }
+.p-lift-name { flex: 1; font-size: 13px; font-weight: 500; letter-spacing: -0.01em; }
+.p-lift-wt { font-family: var(--ffm); font-size: 13px; width: 65px; text-align: right; }
+.p-lift-chg { width: 50px; text-align: right; font-size: 11px; font-weight: 600; }
+.p-lift-spark { width: 44px; height: 18px; margin-left: 8px; flex-shrink: 0; }
+
+.p-section-lbl { font-size: 10px; font-weight: 600; letter-spacing: .10em; text-transform: uppercase; color: var(--text3); padding: 12px 4px 7px; }
+
+</style>
+</head>
+<body>
+<div class="app">
+<div class="phone">
+
+<!-- ── SCREENS ────────────────────────────────── -->
+<div class="screens">
+
+<!-- ══════════════════════════════════
+     SCREEN 1: HOME
+══════════════════════════════════ -->
+<div class="screen active" id="screen-home">
+  <div class="status-bar">
+    <span class="st-time">9:41</span>
+    <div class="st-icons">
+      <svg viewBox="0 0 20 14" fill="var(--text)"><rect x="0" y="4" width="3" height="10" rx="1" opacity=".3"/><rect x="4.5" y="2.5" width="3" height="11.5" rx="1" opacity=".55"/><rect x="9" y="0" width="3" height="14" rx="1" opacity=".8"/><rect x="13.5" y="0" width="3" height="14" rx="1"/></svg>
+      <svg viewBox="0 0 25 12"><rect x=".5" y=".5" width="21" height="11" rx="3" stroke="var(--text)" stroke-opacity=".3" fill="none"/><rect x="2" y="2" width="16" height="8" rx="1.5" fill="var(--text)"/><path d="M23 4v4" stroke="var(--text)" stroke-opacity=".3" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+  <!-- Greeting + coach attribution -->
+  <div class="h-top">
+    <div class="h-greeting-left">
+      <div class="h-date">Mon · 22 Mar · Week 3</div>
+      <div class="h-name">Good morning,<br><em>Marcus.</em></div>
+    </div>
+    <div class="h-coach-badge">
+      <div class="h-coach-av">MC</div>
+      <div class="h-coach-label"><strong>Coach Matt</strong>'s plan</div>
+    </div>
+  </div>
+
+  <div class="scr" style="padding-bottom:20px">
+
+    <!-- TODAY'S SESSION CARD -->
+    <div class="h-today-card" onclick="goTo('workout')">
+      <div class="h-today-body">
+
+        <!-- Block / phase context -->
+        <div class="h-block-row">
+          <span class="h-block-pill">Block A</span>
+          <span class="h-block-sep"></span>
+          <span class="h-phase-label">Accumulation Phase</span>
+        </div>
+
+        <!-- Session name -->
+        <div class="h-session-title">Upper Strength</div>
+        <div class="h-session-focus"><em>Upper push focus</em> — priority on horizontal pressing & vertical pull patterns.</div>
+
+        <!-- Meta: time + section pills -->
+        <div class="h-session-meta">
+          <span class="h-meta-txt">W3 · D1</span>
+          <span class="h-meta-sep">·</span>
+          <span class="h-meta-txt">~55 min</span>
+          <span class="h-meta-sep">·</span>
+          <span class="h-sec-pill hsp-prep">Prep</span>
+          <span class="h-sec-pill hsp-str">Strength</span>
+          <span class="h-sec-pill hsp-cond">Conditioning</span>
+        </div>
+      </div>
+
+      <!-- Coach note -->
+      <div class="h-coach-note">
+        <div class="h-cn-av">MC</div>
+        <div class="h-cn-body">
+          <div class="h-cn-from">Coach Matt · Today</div>
+          <div class="h-cn-msg">Focus on <strong>controlling the eccentric on bench</strong>. Last week your speed looked good — now own the tempo.</div>
+        </div>
+      </div>
+
+      <!-- Start CTA (inside card so it feels connected) -->
+      <button class="h-start-btn" onclick="event.stopPropagation();goTo('workout')">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>Start Session</span>
+      </button>
+    </div>
+
+    <!-- WEEK AT A GLANCE -->
+    <div class="h-week-card">
+      <div class="h-week-hd">
+        <span class="h-week-lbl">This week</span>
+        <span class="h-week-frac"><span>3</span> of 4 sessions done</span>
+      </div>
+      <div class="h-day-pips">
+        <div class="h-pip h-pip-done"></div>
+        <div class="h-pip h-pip-done"></div>
+        <div class="h-pip h-pip-done"></div>
+        <div class="h-pip h-pip-today"></div>
+        <div class="h-pip h-pip-rest"></div>
+        <div class="h-pip h-pip-next"></div>
+        <div class="h-pip h-pip-rest"></div>
+      </div>
+      <div class="h-day-labels">
+        <div class="h-day-lbl">Mon</div>
+        <div class="h-day-lbl">Tue</div>
+        <div class="h-day-lbl">Wed</div>
+        <div class="h-day-lbl today">Thu</div>
+        <div class="h-day-lbl">Fri</div>
+        <div class="h-day-lbl">Sat</div>
+        <div class="h-day-lbl">Sun</div>
+      </div>
+    </div>
+
+    <!-- RECENT SESSIONS -->
+    <div class="h-sessions-hd">
+      <span class="h-sessions-lbl">Recent Sessions</span>
+      <span class="h-sessions-link" onclick="goTo('progress')">See progress →</span>
+    </div>
+
+    <div class="h-session" onclick="goTo('log')">
+      <div class="h-session-icon" style="background:rgba(96,165,250,0.10)">🏋️</div>
+      <div class="h-session-info">
+        <div class="h-session-name">Lower Strength</div>
+        <div class="h-session-meta">Wed 20 Mar · 4 exercises · 48 min</div>
+      </div>
+      <span class="h-session-badge hsb-pr">★ PR</span>
+    </div>
+    <div class="h-session" onclick="goTo('log')">
+      <div class="h-session-icon" style="background:rgba(52,211,153,0.09)">⚡</div>
+      <div class="h-session-info">
+        <div class="h-session-name">Full Body + Conditioning</div>
+        <div class="h-session-meta">Mon 18 Mar · 6 exercises · 62 min</div>
+      </div>
+      <span class="h-session-badge hsb-done">✓</span>
+    </div>
+    <div class="h-session" onclick="goTo('log')">
+      <div class="h-session-icon" style="background:rgba(251,146,60,0.09)">🔥</div>
+      <div class="h-session-info">
+        <div class="h-session-name">Upper Push</div>
+        <div class="h-session-meta">Sat 15 Mar · 5 exercises · 50 min</div>
+      </div>
+      <span class="h-session-badge hsb-done">✓</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SCREEN 2: WORKOUT (block-aware)
+══════════════════════════════════ -->
+<div class="screen" id="screen-workout">
+  <div class="status-bar">
+    <span class="st-time">9:41</span>
+    <div class="st-icons">
+      <svg viewBox="0 0 20 14" fill="var(--text)"><rect x="0" y="4" width="3" height="10" rx="1" opacity=".3"/><rect x="4.5" y="2.5" width="3" height="11.5" rx="1" opacity=".55"/><rect x="9" y="0" width="3" height="14" rx="1" opacity=".8"/><rect x="13.5" y="0" width="3" height="14" rx="1"/></svg>
+      <svg viewBox="0 0 25 12"><rect x=".5" y=".5" width="21" height="11" rx="3" stroke="var(--text)" stroke-opacity=".3" fill="none"/><rect x="2" y="2" width="16" height="8" rx="1.5" fill="var(--text)"/><path d="M23 4v4" stroke="var(--text)" stroke-opacity=".3" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <div class="w-nav">
+    <button class="w-nav-back" onclick="goTo('home')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div class="w-nav-center">
+      <div class="w-nav-session">Week 3 · Day 1</div>
+      <div class="w-nav-title">Upper Strength</div>
+    </div>
+    <div style="width:34px"></div>
+  </div>
+
+  <!-- Block progress segments (one per block) -->
+  <div class="w-block-progress" id="wBlockProgress"></div>
+
+  <!-- Elapsed timer -->
+  <div class="w-timer-pill">
+    <div class="w-timer-left"><div class="w-timer-dot"></div><span class="w-timer-lbl">Elapsed</span></div>
+    <div class="w-timer-val" id="wTimerVal">00:00</div>
+    <div class="w-timer-pause" id="wTimerPause"><svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></div>
+  </div>
+
+  <!-- Scrollable workout content, built by JS -->
+  <div class="scr" style="padding: 0 14px;" id="wScrollArea">
+    <!-- populated by wBuildContent() -->
+  </div>
+
+  <!-- Adaptive CTA -->
+  <div class="w-cta-bar">
+    <div class="w-block-indicator" id="wBlockIndicator"></div>
+    <button class="w-cta-main cta-strength" id="wCtaBtn" onclick="wCtaAction()">
+      <svg viewBox="0 0 24 24" id="wCtaIcon"><polyline points="20 6 9 17 4 12"/></svg>
+      <span id="wCtaLabel">Log Set</span>
+    </button>
+    <button class="w-cta-sub" onclick="goTo('log')">Finish &amp; Log Results →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SCREEN 3: LOG
+══════════════════════════════════ -->
+<div class="screen" id="screen-log">
+  <div class="status-bar">
+    <span class="st-time">9:41</span>
+    <div class="st-icons">
+      <svg viewBox="0 0 20 14" fill="var(--text)"><rect x="0" y="4" width="3" height="10" rx="1" opacity=".3"/><rect x="4.5" y="2.5" width="3" height="11.5" rx="1" opacity=".55"/><rect x="9" y="0" width="3" height="14" rx="1" opacity=".8"/><rect x="13.5" y="0" width="3" height="14" rx="1"/></svg>
+      <svg viewBox="0 0 25 12"><rect x=".5" y=".5" width="21" height="11" rx="3" stroke="var(--text)" stroke-opacity=".3" fill="none"/><rect x="2" y="2" width="16" height="8" rx="1.5" fill="var(--text)"/><path d="M23 4v4" stroke="var(--text)" stroke-opacity=".3" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+  <div class="log-nav">
+    <div class="log-close" onclick="goTo('home')"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
+    <div class="log-info"><div class="log-eyebrow">Post-Workout</div><div class="log-heading">Log Results</div></div>
+    <div class="log-timer-pill"><div class="log-timer-dot"></div><span id="logTimerVal">0:00</span></div>
+  </div>
+  <div class="log-dots" id="logDots"></div>
+  <div class="log-stage">
+    <div class="log-card-stack" id="logCardStack"></div>
+    <div class="log-done" id="logDone">
+      <div class="log-done-ring"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="log-done-title">Workout Logged</div>
+      <div class="log-done-sub">Great session. Keep the momentum going.</div>
+      <div class="log-done-stats">
+        <div class="lds"><div class="lds-num" id="ldEx">5</div><div class="lds-lbl">Exercises</div></div>
+        <div class="lds"><div class="lds-num" id="ldPR">0</div><div class="lds-lbl">PRs Hit</div></div>
+        <div class="lds"><div class="lds-num" id="ldTime">—</div><div class="lds-lbl">Log Time</div></div>
+      </div>
+      <button class="log-done-cta" onclick="goTo('progress')">View Progress →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SCREEN 4: PROGRESS
+══════════════════════════════════ -->
+<div class="screen" id="screen-progress">
+  <div class="status-bar">
+    <span class="st-time">9:41</span>
+    <div class="st-icons">
+      <svg viewBox="0 0 20 14" fill="var(--text)"><rect x="0" y="4" width="3" height="10" rx="1" opacity=".3"/><rect x="4.5" y="2.5" width="3" height="11.5" rx="1" opacity=".55"/><rect x="9" y="0" width="3" height="14" rx="1" opacity=".8"/><rect x="13.5" y="0" width="3" height="14" rx="1"/></svg>
+      <svg viewBox="0 0 25 12"><rect x=".5" y=".5" width="21" height="11" rx="3" stroke="var(--text)" stroke-opacity=".3" fill="none"/><rect x="2" y="2" width="16" height="8" rx="1.5" fill="var(--text)"/><path d="M23 4v4" stroke="var(--text)" stroke-opacity=".3" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+  <div class="p-nav">
+    <div><div class="p-eyebrow">Overview</div><div class="p-nav-title">Your <em>Progress</em></div></div>
+    <div class="p-period-toggle">
+      <button class="p-period-btn" onclick="pSetPeriod('4w',this)">4W</button>
+      <button class="p-period-btn active" onclick="pSetPeriod('3m',this)">3M</button>
+      <button class="p-period-btn" onclick="pSetPeriod('6m',this)">6M</button>
+      <button class="p-period-btn" onclick="pSetPeriod('1y',this)">1Y</button>
+    </div>
+  </div>
+  <div class="scr" style="padding:0 14px 20px">
+    <div class="p-hero-row">
+      <div class="p-hero ph-gold"><div class="p-hero-lbl">Volume</div><div class="p-hero-val">+18</div><div class="p-hero-unit">% vs last period</div><div class="p-hero-delta">↑ Best quarter</div></div>
+      <div class="p-hero ph-teal"><div class="p-hero-lbl">Mobility</div><div class="p-hero-val">74</div><div class="p-hero-unit">out of 100</div><div class="p-hero-delta">↑ +6 pts</div></div>
+    </div>
+    <div class="p-section-lbl">Strength Trends</div>
+    <div class="p-chart-card" id="pStrCard">
+      <div class="p-chart-hd">
+        <div><div class="p-eyebrow">Primary Lifts</div><div class="p-chart-title">Squat & Deadlift</div></div>
+        <div><div class="p-chart-cur" id="pStrCur">315 lbs</div><div class="p-chart-chg" id="pStrChg">↑ +35 lbs</div></div>
+      </div>
+      <div class="p-chart-svg-wrap"><svg class="p-chart-svg" id="pStrSvg" height="110" viewBox="0 0 358 110" preserveAspectRatio="none"></svg></div>
+      <div class="p-chart-xlabels" id="pStrXLbls"></div>
+      <div class="p-chart-legend">
+        <div class="p-legend-item"><div class="p-legend-dot" style="background:var(--gold)"></div>Squat</div>
+        <div class="p-legend-item"><div class="p-legend-dot" style="background:var(--teal)"></div>Deadlift</div>
+      </div>
+    </div>
+    <div class="p-chart-card" id="pPressCard">
+      <div class="p-chart-hd">
+        <div><div class="p-eyebrow">Upper Strength</div><div class="p-chart-title">Bench & Press</div></div>
+        <div><div class="p-chart-cur" id="pPressCur">205 lbs</div><div class="p-chart-chg" id="pPressChg">↑ +20 lbs</div></div>
+      </div>
+      <div class="p-chart-svg-wrap"><svg class="p-chart-svg" id="pPressSvg" height="100" viewBox="0 0 358 100" preserveAspectRatio="none"></svg></div>
+      <div class="p-chart-xlabels" id="pPressXLbls"></div>
+      <div class="p-chart-legend">
+        <div class="p-legend-item"><div class="p-legend-dot" style="background:var(--gold)"></div>Bench</div>
+        <div class="p-legend-item"><div class="p-legend-dot" style="background:var(--rose)"></div>OHP</div>
+      </div>
+    </div>
+    <div class="p-streak-card">
+      <div class="p-streak-hd"><div class="p-streak-title">Weekly PR hits</div><div class="p-streak-sub" id="pStreakSub">8 of 12 weeks</div></div>
+      <div class="p-pr-bars" id="pPRBars"></div>
+      <div class="p-pr-wlbls" id="pPRWLbls"></div>
+    </div>
+    <div class="p-section-lbl">Mobility</div>
+    <div class="p-chart-card" id="pMobCard">
+      <div class="p-chart-hd">
+        <div><div class="p-eyebrow">Overall Score</div><div class="p-chart-title">Mobility Index</div></div>
+        <div><div class="p-chart-cur">74 / 100</div><div class="p-chart-chg">↑ +6 pts</div></div>
+      </div>
+      <div class="p-chart-svg-wrap"><svg class="p-chart-svg" id="pMobSvg" height="90" viewBox="0 0 358 90" preserveAspectRatio="none"></svg></div>
+      <div class="p-chart-xlabels" id="pMobXLbls"></div>
+      <div class="p-mob-section">
+        <div class="p-eyebrow" style="padding-bottom:8px">By Movement</div>
+        <div class="p-mob-grid" id="pMobGrid"></div>
+      </div>
+    </div>
+    <div class="p-section-lbl">All-Time Best</div>
+    <div class="p-lifts-card">
+      <div class="p-lifts-hd"><div class="p-lifts-title">Personal Records</div><div class="p-lifts-sub">1RM EST.</div></div>
+      <div id="pLiftRows"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .screens -->
+
+<!-- ── BOTTOM NAV ───────────────────────── -->
+<nav class="bottom-nav">
+  <button class="nav-item active" id="nav-home" onclick="goTo('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Home</span><div class="nav-dot"></div>
+  </button>
+  <button class="nav-item" id="nav-workout" onclick="goTo('workout')">
+    <svg viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 17.5h11M3 10h3M18 10h3M3 14h3M18 14h3"/></svg>
+    <span>Workout</span><div class="nav-dot"></div>
+  </button>
+  <button class="nav-item" id="nav-log" onclick="goTo('log')">
+    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span>Log</span><div class="nav-dot"></div>
+  </button>
+  <button class="nav-item" id="nav-progress" onclick="goTo('progress')">
+    <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <span>Progress</span><div class="nav-dot"></div>
+  </button>
+</nav>
+
+</div><!-- end .phone -->
+</div><!-- end .app -->
+
+<script>
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+let currentScreen = 'home';
+const screens = ['home','workout','log','progress'];
+
+function goTo(id) {
+  if (id === currentScreen) return;
+  const prev = document.getElementById('screen-' + currentScreen);
+  const next = document.getElementById('screen-' + id);
+  prev.classList.remove('active');
+  prev.classList.add('exit-left');
+  setTimeout(() => prev.classList.remove('exit-left'), 320);
+  next.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('nav-' + id)?.classList.add('active');
+  currentScreen = id;
+
+  if (id === 'log')      { initLog(); }
+  if (id === 'progress') { pRenderAll(); }
+  if (id === 'workout')  { wStartTimer(); }
+}
+
+// ═══════════════════════════════════════════
+// SCREEN 2: WORKOUT (block-aware engine)
+// ═══════════════════════════════════════════
+
+// ── Workout data model ───────────────────
+const WORKOUT = {
+  blocks: [
+    {
+      id: 'prep',
+      type: 'prep',
+      label: 'Prep & Mobility',
+      eyebrow: 'Section 01',
+      items: [
+        { id:'p1', name:'Hip 90/90 Stretch',  detail:'2 rounds · 45s / side', rounds:2 },
+        { id:'p2', name:'Band Pull-Aparts',    detail:'2 × 15 reps', rounds:2 },
+        { id:'p3', name:'Scapular Push-Ups',   detail:'2 × 12 reps · controlled', rounds:2 },
+        { id:'p4', name:'Dead Bugs',           detail:'2 × 10 reps · 3s lower', rounds:2 },
+      ],
+    },
+    {
+      id: 'strength',
+      type: 'strength',
+      label: 'Strength',
+      eyebrow: 'Section 02',
+      exercises: [
+        { id:'s1', ltr:'A', name:'Barbell Bench Press', sets:4, reps:'5',    wt:'185 lbs', last:'4×5',  lastWt:'@180', best:'4×5', bestWt:'@185', trend:'up' },
+        { id:'s2', ltr:'B', name:'Weighted Pull-Up',    sets:4, reps:'5',    wt:'+25 lbs', last:'4×4',  lastWt:'@+25', best:'4×5', bestWt:'@+25', trend:'pr' },
+        { id:'s3', ltr:'C', name:'Incline DB Press',    sets:3, reps:'8–10', wt:'65 lbs',  last:'3×9',  lastWt:'@65',  best:'3×10',bestWt:'@65',  trend:'same' },
+        { id:'s4', ltr:'D', name:'Cable Seated Row',    sets:3, reps:'12',   wt:'120 lbs', last:'3×12', lastWt:'@115', best:'3×12',bestWt:'@120', trend:'up' },
+        { id:'s5', ltr:'E', name:'Overhead Press',      sets:3, reps:'6–8',  wt:'115 lbs', last:'3×7',  lastWt:'@115', best:'3×8', bestWt:'@115', trend:'same' },
+      ],
+    },
+    {
+      id: 'cond',
+      type: 'conditioning',
+      label: 'Conditioning',
+      eyebrow: 'Section 03',
+      format: 'emom',       // 'emom' | 'interval' | 'rounds'
+      title: 'Upper Finisher',
+      duration: 10,          // minutes (for EMOM)
+      interval: null,        // { work: 40, rest: 20 } for interval
+      roundsTotal: null,     // number for rounds
+      exercises: [
+        { marker:'ODD', name:'Push-Ups', val:'15 reps' },
+        { marker:'EVEN', name:'Dumbbell Row', val:'10 / side' },
+      ],
+    },
+  ],
+};
+
+// ── State ────────────────────────────────
+const wState = {
+  prepDone: {},         // id -> bool
+  sets: {},             // exerciseId -> bool[]
+  condRoundsDone: 0,
+  emomRunning: false,
+  emomSec: 0,
+  emomMinute: 1,
+  emomInterval: null,
+};
+
+// init sets state
+WORKOUT.blocks.find(b=>b.type==='strength').exercises.forEach(ex => {
+  wState.sets[ex.id] = new Array(ex.sets).fill(false);
+});
+
+// ── Elapsed timer ─────────────────────────
+let wElapsed = 0, wRunning = false, wElapsedInt = null;
+
+function wStartTimer() {
+  if (wRunning) return;
+  wRunning = true;
+  wElapsedInt = setInterval(() => {
+    wElapsed++;
+    const m = Math.floor(wElapsed/60), s = wElapsed%60;
+    const el = document.getElementById('wTimerVal');
+    if (el) el.textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }, 1000);
+  wBuildContent();
+}
+
+document.getElementById('wTimerPause')?.addEventListener('click', e => {
+  e.stopPropagation();
+  wRunning = !wRunning;
+  if (wRunning) {
+    wElapsedInt = setInterval(()=>{
+      wElapsed++;
+      const m=Math.floor(wElapsed/60),s=wElapsed%60;
+      const el=document.getElementById('wTimerVal');
+      if(el)el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    },1000);
+  } else {
+    clearInterval(wElapsedInt);
+  }
+  const btn = document.getElementById('wTimerPause');
+  btn.innerHTML = wRunning
+    ? `<svg viewBox="0 0 24 24" style="width:10px;height:10px;fill:var(--text2)"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>`
+    : `<svg viewBox="0 0 24 24" style="width:10px;height:10px;fill:var(--text2)"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+});
+
+// ── Build content (full render) ───────────
+function wBuildContent() {
+  const area = document.getElementById('wScrollArea');
+  if (!area) return;
+  area.innerHTML = '';
+
+  WORKOUT.blocks.forEach((block, bi) => {
+    const wrapper = document.createElement('div');
+    wrapper.style.marginBottom = '8px';
+
+    // Block header
+    const pip = block.type === 'prep' ? 'prep' : block.type === 'strength' ? 'str' : 'cond';
+    const badge = block.type === 'prep'
+      ? `${block.items.length} items`
+      : block.type === 'strength'
+      ? `${block.exercises.length} exercises`
+      : block.format ? block.format.toUpperCase() : 'Finisher';
+    const badgeCls = `bh-badge-${pip}`;
+
+    wrapper.innerHTML = `
+      <div class="block-header">
+        <div class="bh-pip bh-pip-${pip}"></div>
+        <div class="bh-text">
+          <div class="bh-eyebrow">${block.eyebrow}</div>
+          <div class="bh-title">${block.label}</div>
+        </div>
+        <span class="bh-badge ${badgeCls}">${badge}</span>
+      </div>
+      <div class="block-divider"></div>
+    `;
+
+    if (block.type === 'prep')         wrapper.appendChild(wBuildPrepBlock(block));
+    if (block.type === 'strength')     wrapper.appendChild(wBuildStrengthBlock(block));
+    if (block.type === 'conditioning') wrapper.appendChild(wBuildCondBlock(block));
+
+    area.appendChild(wrapper);
+  });
+
+  const spacer = document.createElement('div');
+  spacer.style.height = '14px';
+  area.appendChild(spacer);
+
+  wBuildProgress();
+  wUpdateCta();
+}
+
+// ── PREP block ────────────────────────────
+function wBuildPrepBlock(block) {
+  const frag = document.createDocumentFragment();
+  block.items.forEach(item => {
+    const el = document.createElement('div');
+    const done = !!wState.prepDone[item.id];
+    el.className = 'prep-item' + (done ? ' done' : '');
+    el.innerHTML = `
+      <div class="prep-chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="prep-body">
+        <div class="prep-name">${item.name}</div>
+        <div class="prep-det">${item.detail}</div>
+      </div>
+      ${item.rounds ? `<div class="prep-rounds-badge">${done ? '✓ Done' : item.rounds + ' rounds'}</div>` : ''}
+    `;
+    el.addEventListener('click', () => {
+      wState.prepDone[item.id] = !wState.prepDone[item.id];
+      el.classList.toggle('done', !!wState.prepDone[item.id]);
+      // update check
+      const chk = el.querySelector('.prep-chk');
+      if (wState.prepDone[item.id]) { chk.style.background='var(--green)';chk.style.borderColor='var(--green)'; chk.querySelector('svg').style.opacity='1'; }
+      else { chk.style.background='';chk.style.borderColor='';chk.querySelector('svg').style.opacity='0'; }
+      // update badge
+      const badge = el.querySelector('.prep-rounds-badge');
+      if (badge) badge.textContent = wState.prepDone[item.id] ? '✓ Done' : item.rounds+' rounds';
+      el.classList.toggle('done', !!wState.prepDone[item.id]);
+      wBuildProgress(); wUpdateCta();
+    });
+    frag.appendChild(el);
+  });
+
+  // Prep note
+  const note = document.createElement('div');
+  note.className = 'prep-note';
+  note.innerHTML = `<svg viewBox="0 0 24 24" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Tap each item to mark complete. No set logging needed here.`;
+  frag.appendChild(note);
+
+  return frag;
+}
+
+// ── STRENGTH block ────────────────────────
+function wBuildStrengthBlock(block) {
+  const frag = document.createDocumentFragment();
+  block.exercises.forEach((ex, ei) => {
+    const sets = wState.sets[ex.id];
+    const done = sets.filter(Boolean).length;
+    const isComplete = done === ex.sets;
+    const isActive = done > 0 && !isComplete;
+
+    const card = document.createElement('div');
+    card.className = 'str-card' + (isComplete ? ' s-done' : isActive ? ' s-active' : '');
+    card.id = 'wsc-' + ex.id;
+
+    const trendIcon = ex.trend==='up' ? `<span style="color:var(--lime);font-size:10px">↑ +wt</span>`
+      : ex.trend==='pr'   ? `<span style="color:var(--gold);font-size:10px">★ PR</span>`
+      : `<span style="color:var(--text3);font-size:10px">→ Match</span>`;
+
+    const ringHtml = isComplete
+      ? `<div class="sc-ring"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:var(--bg);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg></div>`
+      : `<div class="sc-ring">${done}/${ex.sets}</div>`;
+
+    const bubbles = sets.map((logged, si) => {
+      const cls = logged ? 'logged' : si===done ? 'active-set' : '';
+      return `<div class="set-bub ${cls}" data-ex="${ex.id}" data-si="${si}">Set ${si+1}</div>`;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="sc-top">
+        <div class="sc-ltr">${ex.ltr}</div>
+        <div class="sc-main">
+          <div class="sc-name">${ex.name}</div>
+          <div class="sc-tags">
+            <span class="sc-tag stag-sets">${ex.sets} sets</span>
+            <span class="sc-tag stag-reps">${ex.reps} reps</span>
+            <span class="sc-tag stag-wt">${ex.wt}</span>
+          </div>
+        </div>
+        ${ringHtml}
+      </div>
+      <div class="sc-div"></div>
+      <div class="sc-bot">
+        <div class="sc-stat">
+          <div class="sc-stat-lbl">Target</div>
+          <div class="sc-stat-val">${ex.sets}×${ex.reps}</div>
+          <div class="sc-stat-sub">${ex.wt}</div>
+        </div>
+        <div class="sc-vdiv"></div>
+        <div class="sc-stat">
+          <div class="sc-stat-lbl">Last</div>
+          <div class="sc-stat-val">${ex.last}</div>
+          <div class="sc-stat-sub">${ex.lastWt}</div>
+        </div>
+        <div class="sc-vdiv"></div>
+        <div class="sc-stat">
+          <div class="sc-stat-lbl">Best</div>
+          <div class="sc-stat-val">${ex.best}</div>
+          <div class="sc-stat-sub ${ex.trend==='up'||ex.trend==='pr'?'up':''}">${ex.bestWt} ${trendIcon}</div>
+        </div>
+      </div>
+      <div class="sc-sets" id="wsets-${ex.id}">${bubbles}</div>
+    `;
+
+    // bind set bubble clicks
+    card.querySelectorAll('.set-bub').forEach(bub => {
+      bub.addEventListener('click', () => {
+        const si = +bub.dataset.si;
+        const exId = bub.dataset.ex;
+        wState.sets[exId][si] = !wState.sets[exId][si];
+        wRefreshStrCard(exId);
+        wBuildProgress(); wUpdateCta();
+      });
+    });
+
+    frag.appendChild(card);
+  });
+  return frag;
+}
+
+function wRefreshStrCard(exId) {
+  const card = document.getElementById('wsc-' + exId);
+  if (!card) return;
+  const ex = WORKOUT.blocks.find(b=>b.type==='strength').exercises.find(e=>e.id===exId);
+  const sets = wState.sets[exId];
+  const done = sets.filter(Boolean).length;
+  const isComplete = done === ex.sets;
+  const isActive = done > 0 && !isComplete;
+
+  card.classList.toggle('s-done',   isComplete);
+  card.classList.toggle('s-active', isActive && !isComplete);
+
+  // Update ring
+  const ring = card.querySelector('.sc-ring');
+  if (ring) {
+    ring.innerHTML = isComplete
+      ? `<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:var(--bg);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg>`
+      : `${done}/${ex.sets}`;
+    ring.style.background = isComplete ? 'var(--lime)' : '';
+    ring.style.borderColor = isComplete ? 'var(--lime)' : '';
+    ring.style.color = isComplete ? 'var(--bg)' : '';
+  }
+
+  // Update letter badge
+  const ltr = card.querySelector('.sc-ltr');
+  if (ltr) {
+    ltr.style.background = isComplete ? 'var(--lime-dim)' : '';
+    ltr.style.borderColor = isComplete ? 'rgba(201,241,61,.2)' : '';
+    ltr.style.color = isComplete ? 'var(--lime)' : '';
+  }
+
+  // Update bubbles
+  const setsEl = document.getElementById('wsets-' + exId);
+  if (setsEl) {
+    setsEl.querySelectorAll('.set-bub').forEach((bub, si) => {
+      bub.classList.remove('logged','active-set');
+      if (sets[si]) bub.classList.add('logged');
+      else if (si === done) bub.classList.add('active-set');
+    });
+  }
+}
+
+// ── CONDITIONING block ────────────────────
+function wBuildCondBlock(block) {
+  const frag = document.createDocumentFragment();
+  const card = document.createElement('div');
+  card.className = 'cond-hero-card';
+  card.id = 'wCondCard';
+
+  let innerHtml = '';
+
+  // Format banner
+  const fmtLabel = block.format === 'emom' ? 'EMOM'
+    : block.format === 'interval' ? 'Interval'
+    : 'For Rounds';
+
+  let durationDisplay = '';
+  if (block.format === 'emom' && block.duration) {
+    durationDisplay = `<div>
+      <div class="cfb-duration">${block.duration}</div>
+      <div class="cfb-duration-lbl">Minutes</div>
+    </div>`;
+  } else if (block.format === 'interval' && block.interval) {
+    durationDisplay = `<div style="font-family:var(--ffm);font-size:13px;color:var(--text2)">${block.interval.work}s / ${block.interval.rest}s</div>`;
+  } else if (block.format === 'rounds' && block.roundsTotal) {
+    durationDisplay = `<div>
+      <div class="cfb-duration">${block.roundsTotal}</div>
+      <div class="cfb-duration-lbl">Rounds</div>
+    </div>`;
+  }
+
+  innerHtml += `<div class="cond-format-banner">
+    <div class="cfb-format">${fmtLabel} · ${block.title}</div>
+    ${durationDisplay}
+  </div>`;
+
+  // Interval display or EMOM timer
+  if (block.format === 'interval' && block.interval) {
+    innerHtml += `<div class="cond-interval-display">
+      <div class="cid-half">
+        <div class="cid-label work">Work</div>
+        <div class="cid-val work">${block.interval.work}</div>
+        <div class="cid-unit work">seconds</div>
+      </div>
+      <div class="cid-divider"></div>
+      <div class="cid-half">
+        <div class="cid-label rest">Rest</div>
+        <div class="cid-val rest">${block.interval.rest}</div>
+        <div class="cid-unit rest">seconds</div>
+      </div>
+    </div>`;
+  }
+
+  if (block.format === 'emom') {
+    innerHtml += `<div class="cond-emom-timer">
+      <div class="cet-label">Next minute in</div>
+      <div class="cet-clock" id="cetClock">1:00</div>
+      <div class="cet-minute-label" id="cetMinLbl">Minute 1 of ${block.duration}</div>
+      <div class="cet-progress-track"><div class="cet-progress-fill" id="cetFill" style="width:100%"></div></div>
+    </div>`;
+  }
+
+  // Timer controls
+  innerHtml += `<div class="cond-timer-controls">
+    <button class="ctc-btn ctc-start" id="condStartBtn" onclick="wCondToggle()">
+      <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:#0a0a0b"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Start
+    </button>
+    <button class="ctc-btn ctc-reset" id="condResetBtn" onclick="wCondReset()" title="Reset">
+      <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-6"/></svg>
+    </button>
+  </div>`;
+
+  // Exercise list
+  innerHtml += `<div class="cond-exercises">`;
+  block.exercises.forEach(ex => {
+    innerHtml += `<div class="cond-ex-row">
+      <div class="cer-marker">${ex.marker}</div>
+      <div class="cer-name">${ex.name}</div>
+      <div class="cer-val">${ex.val}</div>
+    </div>`;
+  });
+  innerHtml += `</div>`;
+
+  // Rounds tracker (for rounds or to track EMOM sets)
+  if (block.format === 'rounds' && block.roundsTotal) {
+    const bubbles = Array.from({length: block.roundsTotal}, (_,i) => {
+      const done = i < wState.condRoundsDone;
+      const active = i === wState.condRoundsDone;
+      return `<div class="cr-bub ${done?'done':active?'active':''}" onclick="wCondRound(${i})">${i+1}</div>`;
+    }).join('');
+    innerHtml += `<div class="cond-rounds">
+      <div class="cr-label">Rounds</div>
+      <div class="cr-bubbles">${bubbles}</div>
+    </div>`;
+  }
+
+  if (block.format === 'emom') {
+    const total = block.duration;
+    const bubbles = Array.from({length: total}, (_,i) => {
+      const done = i < wState.emomMinute - 1;
+      const active = i === wState.emomMinute - 1;
+      return `<div class="cr-bub ${done?'done':active?'active':''}" style="font-size:10px">${i+1}</div>`;
+    }).join('');
+    innerHtml += `<div class="cond-rounds">
+      <div class="cr-label">Minutes</div>
+      <div class="cr-bubbles" id="emomMinuteBubs" style="flex-wrap:wrap;gap:4px">${bubbles}</div>
+    </div>`;
+  }
+
+  card.innerHTML = innerHtml;
+  frag.appendChild(card);
+  return frag;
+}
+
+// ── EMOM timer logic ──────────────────────
+function wCondToggle() {
+  const block = WORKOUT.blocks.find(b=>b.type==='conditioning');
+  if (!block || block.format !== 'emom') return;
+
+  wState.emomRunning = !wState.emomRunning;
+  const btn = document.getElementById('condStartBtn');
+  if (!btn) return;
+
+  if (wState.emomRunning) {
+    btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:#0a0a0b"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg> Pause`;
+    wState.emomInterval = setInterval(() => {
+      wState.emomSec++;
+      const secInMin = wState.emomSec % 60;
+      const elapsed60 = 60 - secInMin;
+      const min = Math.floor(wState.emomSec / 60);
+
+      // advance minute
+      if (secInMin === 0 && wState.emomSec > 0) {
+        wState.emomMinute = min + 1;
+        wRefreshEmomBubs(block.duration);
+      }
+
+      // update clock
+      const clock = document.getElementById('cetClock');
+      if (clock) {
+        const rem = elapsed60;
+        const m2 = Math.floor(rem/60), s2 = rem%60;
+        clock.textContent = m2+':'+String(s2).padStart(2,'0');
+        clock.classList.toggle('warning', rem <= 15 && rem > 5);
+        clock.classList.toggle('danger',  rem <= 5);
+      }
+      const fill = document.getElementById('cetFill');
+      if (fill) fill.style.width = (elapsed60/60*100)+'%';
+      const minLbl = document.getElementById('cetMinLbl');
+      if (minLbl) minLbl.textContent = `Minute ${Math.min(wState.emomMinute, block.duration)} of ${block.duration}`;
+
+      // check done
+      if (wState.emomSec >= block.duration * 60) {
+        clearInterval(wState.emomInterval);
+        wState.emomRunning = false;
+        if (clock) { clock.textContent = 'Done'; clock.classList.remove('warning','danger'); }
+        if (btn) btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:#0a0a0b"><polygon points="5 3 19 12 5 21 5 3"/></svg> Done`;
+        wBuildProgress(); wUpdateCta();
+      }
+    }, 1000);
+  } else {
+    clearInterval(wState.emomInterval);
+    btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:#0a0a0b"><polygon points="5 3 19 12 5 21 5 3"/></svg> Resume`;
+  }
+}
+
+function wCondReset() {
+  clearInterval(wState.emomInterval);
+  wState.emomRunning = false;
+  wState.emomSec = 0;
+  wState.emomMinute = 1;
+  const block = WORKOUT.blocks.find(b=>b.type==='conditioning');
+  const clock = document.getElementById('cetClock');
+  if (clock) { clock.textContent = '1:00'; clock.classList.remove('warning','danger'); }
+  const fill = document.getElementById('cetFill');
+  if (fill) fill.style.width = '100%';
+  const minLbl = document.getElementById('cetMinLbl');
+  if (minLbl && block) minLbl.textContent = `Minute 1 of ${block.duration}`;
+  const btn = document.getElementById('condStartBtn');
+  if (btn) btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:#0a0a0b"><polygon points="5 3 19 12 5 21 5 3"/></svg> Start`;
+  if (block) wRefreshEmomBubs(block.duration);
+}
+
+function wRefreshEmomBubs(total) {
+  const wrap = document.getElementById('emomMinuteBubs');
+  if (!wrap) return;
+  wrap.innerHTML = Array.from({length:total},(_,i)=>{
+    const done = i < wState.emomMinute-1;
+    const active = i === wState.emomMinute-1;
+    return `<div class="cr-bub ${done?'done':active?'active':''}" style="font-size:10px">${i+1}</div>`;
+  }).join('');
+}
+
+function wCondRound(i) {
+  wState.condRoundsDone = (i < wState.condRoundsDone) ? i : i+1;
+  wBuildContent();
+}
+
+// ── Progress segments ─────────────────────
+function wBuildProgress() {
+  const wrap = document.getElementById('wBlockProgress');
+  if (!wrap) return;
+  wrap.innerHTML = WORKOUT.blocks.map(block => {
+    const status = wBlockStatus(block);
+    const pip = block.type==='prep'?'prep':block.type==='strength'?'str':'cond';
+    return `<div class="w-bp-seg ${status} ${pip}" title="${block.label}" onclick="wScrollToBlock('${block.id}')"></div>`;
+  }).join('');
+}
+
+function wBlockStatus(block) {
+  if (block.type === 'prep') {
+    const done = block.items.filter(i=>wState.prepDone[i.id]).length;
+    return done === block.items.length ? 'done' : done > 0 ? 'active' : 'pending';
+  }
+  if (block.type === 'strength') {
+    const total = block.exercises.reduce((s,ex)=>s+ex.sets,0);
+    const done  = block.exercises.reduce((s,ex)=>s+wState.sets[ex.id].filter(Boolean).length,0);
+    return done === total ? 'done' : done > 0 ? 'active' : 'pending';
+  }
+  if (block.type === 'conditioning') {
+    return wState.emomSec >= (WORKOUT.blocks.find(b=>b.type==='conditioning')?.duration||10)*60 ? 'done'
+      : wState.emomRunning || wState.emomSec > 0 ? 'active' : 'pending';
+  }
+  return 'pending';
+}
+
+function wScrollToBlock(id) {
+  const area = document.getElementById('wScrollArea');
+  // find block header containing that block id
+  if (!area) return;
+  const blocks = area.querySelectorAll('.block-header');
+  const idx = WORKOUT.blocks.findIndex(b=>b.id===id);
+  if (blocks[idx]) blocks[idx].scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ── Adaptive CTA ──────────────────────────
+function wUpdateCta() {
+  const btn   = document.getElementById('wCtaBtn');
+  const lbl   = document.getElementById('wCtaLabel');
+  const icon  = document.getElementById('wCtaIcon');
+  const indic = document.getElementById('wBlockIndicator');
+  if (!btn) return;
+
+  // determine which block is "active" = first incomplete
+  let activeBlock = WORKOUT.blocks.find(b=>wBlockStatus(b)!=='done') || WORKOUT.blocks[WORKOUT.blocks.length-1];
+
+  const colors = { prep:'green', strength:'lime', conditioning:'orange' };
+  const dotColors = { prep:'var(--green)', strength:'var(--blue)', conditioning:'var(--orange)' };
+  const blockLabels = { prep:'Prep Block', strength:'Strength Block', conditioning:'Conditioning Block' };
+
+  btn.className = 'w-cta-main cta-' + (activeBlock.type==='strength' ? 'strength' : activeBlock.type==='conditioning' ? 'cond' : 'prep');
+
+  if (activeBlock.type === 'prep') {
+    const doneCount = activeBlock.items.filter(i=>wState.prepDone[i.id]).length;
+    const remaining = activeBlock.items.length - doneCount;
+    lbl.textContent = remaining > 0 ? `Mark Next Item Done` : 'Prep Complete ✓';
+    icon.setAttribute('viewBox','0 0 24 24');
+    icon.innerHTML = `<polyline points="20 6 9 17 4 12"/>`;
+  } else if (activeBlock.type === 'strength') {
+    // find first incomplete exercise
+    const strBlock = WORKOUT.blocks.find(b=>b.type==='strength');
+    let label = 'Log Set';
+    for (const ex of strBlock.exercises) {
+      const done = wState.sets[ex.id].filter(Boolean).length;
+      if (done < ex.sets) { label = `Log Set · ${ex.name.split(' ')[0]} ${ex.ltr}`; break; }
+    }
+    lbl.textContent = label;
+    icon.setAttribute('viewBox','0 0 24 24');
+    icon.innerHTML = `<polyline points="20 6 9 17 4 12"/>`;
+  } else {
+    const condBlock = WORKOUT.blocks.find(b=>b.type==='conditioning');
+    lbl.textContent = wState.emomRunning ? 'Timer Running' : wState.emomSec > 0 ? 'Resume Timer' : 'Start EMOM';
+    icon.setAttribute('viewBox','0 0 24 24');
+    icon.innerHTML = wState.emomRunning
+      ? `<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>`
+      : `<polygon points="5 3 19 12 5 21 5 3"/>`;
+  }
+
+  // Block indicator
+  if (indic) {
+    const dotColor = dotColors[activeBlock.type] || 'var(--text3)';
+    indic.innerHTML = `<div class="w-bi-dot" style="background:${dotColor}"></div><span class="w-bi-label">${blockLabels[activeBlock.type]}</span>`;
+  }
+}
+
+function wCtaAction() {
+  const activeBlock = WORKOUT.blocks.find(b=>wBlockStatus(b)!=='done') || WORKOUT.blocks[WORKOUT.blocks.length-1];
+
+  if (activeBlock.type === 'prep') {
+    // mark next unchecked prep item
+    const item = activeBlock.items.find(i=>!wState.prepDone[i.id]);
+    if (item) {
+      wState.prepDone[item.id] = true;
+      // re-render prep items without full rebuild for speed
+      wBuildContent();
+    }
+  } else if (activeBlock.type === 'strength') {
+    // log next available set
+    const strBlock = WORKOUT.blocks.find(b=>b.type==='strength');
+    for (const ex of strBlock.exercises) {
+      const done = wState.sets[ex.id].filter(Boolean).length;
+      if (done < ex.sets) {
+        wState.sets[ex.id][done] = true;
+        wRefreshStrCard(ex.id);
+        wBuildProgress(); wUpdateCta();
+        return;
+      }
+    }
+  } else if (activeBlock.type === 'conditioning') {
+    wCondToggle();
+    wUpdateCta();
+  }
+}
+
+// toggle prep item (legacy helper kept for inline onclick)
+function wTogglePrep(el) { el.classList.toggle('done'); wBuildProgress(); wUpdateCta(); }
+
+// ═══════════════════════════════════════════
+// SCREEN 3: LOG
+// ═══════════════════════════════════════════
+const logExercises = [
+  { name:'Barbell Bench Press', target:'4×5 @185lbs', last:'4×5 @180lbs', est:{s:4,r:5,w:185}, badge:'↑ +5 lbs', bc:'lcb-up', chips:['Felt strong','Tough','Good form'] },
+  { name:'Weighted Pull-Up',    target:'4×5 @+25lbs', last:'4×4 @+25lbs', est:{s:4,r:5,w:'+25'}, badge:'★ PR target', bc:'lcb-pr', chips:['Felt strong','Grind','Tough'] },
+  { name:'Incline DB Press',    target:'3×10 @65lbs', last:'3×9 @65lbs',  est:{s:3,r:10,w:65}, badge:'→ Same', bc:'lcb-same', chips:['Felt strong','Tough','Left tight'] },
+  { name:'Cable Seated Row',    target:'3×12 @120lbs',last:'3×12 @115lbs',est:{s:3,r:12,w:120}, badge:'↑ +5 lbs', bc:'lcb-up', chips:['Easy','Good form','Tough'] },
+  { name:'Overhead Press',      target:'3×8 @115lbs', last:'3×7 @115lbs', est:{s:3,r:8,w:115}, badge:'→ Same', bc:'lcb-same', chips:['Tough','Shoulder tight','Good form'] },
+];
+let logCurrent = 0, logResults = logExercises.map(e=>({...e.est}));
+let logTimerSec = 0, logTimerInt = null, logPRs = 0;
+let logEditOpen = new Array(logExercises.length).fill(false);
+let logInitialized = false;
+
+function initLog() {
+  if (logInitialized) return;
+  logInitialized = true;
+  logCurrent = 0;
+  logTimerInt = setInterval(() => {
+    logTimerSec++;
+    document.getElementById('logTimerVal').textContent =
+      Math.floor(logTimerSec/60)+':'+String(logTimerSec%60).padStart(2,'0');
+  }, 1000);
+  logRenderDots();
+  logRenderStack();
+}
+
+function logRenderDots() {
+  const wrap = document.getElementById('logDots');
+  wrap.innerHTML = logExercises.map((_,i) =>
+    `<div class="log-dot ${i < logCurrent ? 'ld-done' : i === logCurrent ? 'ld-current' : ''}"></div>`
+  ).join('');
+}
+
+function logBuildCard(idx, depth) {
+  const ex = logExercises[idx];
+  const res = logResults[idx];
+  const unit = typeof res.w === 'string' ? '' : ' lbs';
+  const div = document.createElement('div');
+  div.className = 'log-card';
+  div.dataset.depth = depth;
+  div.dataset.idx = idx;
+  div.style.zIndex = 10 - depth;
+  if (depth > 0) {
+    div.style.position = 'absolute';
+    div.style.top = (depth * 9) + 'px';
+    div.style.transform = `scale(${1 - depth * 0.03})`;
+    div.style.opacity = depth === 1 ? '0.55' : '0.28';
+  }
+  div.innerHTML = `
+    <div class="lc-eyebrow"><span class="lc-idx">${String(idx+1).padStart(2,'0')} / ${String(logExercises.length).padStart(2,'0')}</span><span class="lc-badge ${ex.bc}">${ex.badge}</span></div>
+    <div class="lc-name">${ex.name}</div>
+    <div class="lc-stats">
+      <div class="lcs"><div class="lcs-lbl">Target</div><div class="lcs-val">${ex.target.split('@')[0].trim()}</div><div class="lcs-sub">${ex.target.includes('@') ? '@'+ex.target.split('@')[1] : ''}</div></div>
+      <div class="lcs"><div class="lcs-lbl">Last Time</div><div class="lcs-val">${ex.last.split('@')[0].trim()}</div><div class="lcs-sub">${ex.last.includes('@') ? '@'+ex.last.split('@')[1] : ''}</div></div>
+      <div class="lcs hi"><div class="lcs-lbl">Est. Today</div><div class="lcs-val">${res.s}×${res.r}</div><div class="lcs-sub ${ex.bc === 'lcb-up'||ex.bc==='lcb-pr'?'up':''}">${res.w}${unit}</div></div>
+    </div>
+    <div class="lc-result">
+      <div class="lc-result-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="lc-result-text" style="flex:1"><div class="lc-result-label">Logging</div><div class="lc-result-val" id="lrv-${idx}">${res.s}×${res.r} @ ${res.w}${unit}</div></div>
+      <button class="lc-edit-btn" onclick="logToggleEdit(event,${idx})">Edit</button>
+    </div>
+    <div class="lc-inline-edit ${logEditOpen[idx]?'open':''}" id="lie-${idx}">
+      <div class="lce-lbl">Adjust Result</div>
+      <div class="lce-fields">
+        <div class="lce-field"><label>Sets</label><input type="number" id="les-${idx}" value="${res.s}" min="1" max="10" inputmode="numeric" onchange="logUpdateRes(${idx})"><div class="lce-steppers"><button class="lce-step" onmousedown="logStep('s',${idx},-1)">−</button><button class="lce-step" onmousedown="logStep('s',${idx},+1)">+</button></div></div>
+        <div class="lce-field"><label>Reps</label><input type="number" id="ler-${idx}" value="${res.r}" min="1" max="30" inputmode="numeric" onchange="logUpdateRes(${idx})"><div class="lce-steppers"><button class="lce-step" onmousedown="logStep('r',${idx},-1)">−</button><button class="lce-step" onmousedown="logStep('r',${idx},+1)">+</button></div></div>
+        <div class="lce-field"><label>Weight</label><input type="number" id="lew-${idx}" value="${typeof res.w==='string'?res.w.replace('+',''):res.w}" min="0" step="5" inputmode="numeric" onchange="logUpdateRes(${idx})"><div class="lce-steppers"><button class="lce-step" onmousedown="logStep('w',${idx},-5)">−5</button><button class="lce-step" onmousedown="logStep('w',${idx},+5)">+5</button></div></div>
+      </div>
+      <div class="lce-done-row"><button class="lce-done" onclick="logCloseEdit(event,${idx})">Done</button></div>
+    </div>
+    <div class="lc-notes">${ex.chips.map(c=>`<button class="note-chip" onclick="logSelNote(this)">${c}</button>`).join('')}</div>
+    <div class="lc-actions">
+      <button class="lc-skip" onclick="logSkip()"><svg viewBox="0 0 24 24"><polyline points="5 12 19 12"/><polyline points="13 6 19 12 13 18"/></svg>Skip</button>
+      <button class="lc-confirm" id="lcnf-${idx}" onclick="logConfirm(${idx})"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>Confirm</span></button>
+    </div>
+  `;
+  return div;
+}
+
+function logRenderStack() {
+  const stack = document.getElementById('logCardStack');
+  // remove old cards
+  stack.querySelectorAll('.log-card').forEach(c => c.remove());
+  for (let d = Math.min(2, logExercises.length - 1 - logCurrent); d >= 0; d--) {
+    const idx = logCurrent + d;
+    if (idx >= logExercises.length) continue;
+    stack.appendChild(logBuildCard(idx, d));
+  }
+  logRenderDots();
+}
+
+function logToggleEdit(e, idx) { e.stopPropagation(); logEditOpen[idx] = !logEditOpen[idx]; document.getElementById('lie-'+idx)?.classList.toggle('open', logEditOpen[idx]); }
+function logCloseEdit(e, idx)  { e.stopPropagation(); logEditOpen[idx] = false; document.getElementById('lie-'+idx)?.classList.remove('open'); }
+function logSelNote(btn) { btn.classList.toggle('sel'); }
+
+function logStep(field, idx, delta) {
+  const key = field === 's' ? 'les' : field === 'r' ? 'ler' : 'lew';
+  const el = document.getElementById(key+'-'+idx);
+  if (!el) return;
+  el.value = Math.max(0, (parseFloat(el.value)||0) + delta);
+  logUpdateRes(idx);
+}
+function logUpdateRes(idx) {
+  const s = parseInt(document.getElementById('les-'+idx)?.value)||1;
+  const r = parseInt(document.getElementById('ler-'+idx)?.value)||1;
+  const wRaw = parseInt(document.getElementById('lew-'+idx)?.value)||0;
+  const isPlus = typeof logExercises[idx].est.w === 'string';
+  const w = isPlus ? '+'+wRaw : wRaw;
+  logResults[idx] = {s, r, w};
+  const unit = isPlus ? '' : ' lbs';
+  const el = document.getElementById('lrv-'+idx);
+  if (el) el.textContent = `${s}×${r} @ ${w}${unit}`;
+}
+
+function logConfirm(idx) {
+  if (logExercises[idx].bc === 'lcb-up' || logExercises[idx].bc === 'lcb-pr') logPRs++;
+  const btn = document.getElementById('lcnf-'+idx);
+  if (btn) { btn.classList.add('flash'); setTimeout(()=>btn.classList.remove('flash'),350); }
+  const topCard = document.querySelector('.log-card[data-depth="0"]');
+  if (topCard) { setTimeout(()=>{ topCard.classList.add('lc-exit-r'); setTimeout(()=>logAdvance(),300); },180); }
+  else logAdvance();
+}
+function logSkip() {
+  const topCard = document.querySelector('.log-card[data-depth="0"]');
+  if (topCard) { topCard.classList.add('lc-exit-l'); setTimeout(()=>logAdvance(),300); }
+  else logAdvance();
+}
+function logAdvance() {
+  logCurrent++;
+  if (logCurrent >= logExercises.length) { logShowDone(); return; }
+  logRenderStack();
+}
+function logShowDone() {
+  clearInterval(logTimerInt);
+  document.getElementById('logCardStack').style.display = 'none';
+  document.getElementById('logDots').style.display = 'none';
+  document.getElementById('logDone').classList.add('visible');
+  const m = Math.floor(logTimerSec/60), s = logTimerSec%60;
+  document.getElementById('ldPR').textContent = logPRs;
+  document.getElementById('ldTime').textContent = m+':'+String(s).padStart(2,'0');
+}
+
+// ═══════════════════════════════════════════
+// SCREEN 4: PROGRESS — CHARTS
+// ═══════════════════════════════════════════
+const PERIODS = {
+  '4w':{ labels:['W1','W2','W3','W4'], squat:[265,270,275,280], dead:[305,310,315,315], bench:[175,180,185,185], ohp:[105,105,110,110], mob:[68,69,71,74], sc:'280 lbs', sChg:'↑ +15', pc:'185 lbs', pChg:'↑ +10', streakSub:'3 of 4 weeks', prHits:[true,true,false,true] },
+  '3m':{ labels:['Jan','Feb','Mar'], squat:[280,295,310,315], dead:[295,305,310,315], bench:[185,190,200,205], ohp:[110,115,118,120], mob:[65,68,71,74], sc:'315 lbs', sChg:'↑ +35', pc:'205 lbs', pChg:'↑ +20', streakSub:'8 of 12 weeks', prHits:[true,false,true,true,false,true,true,false,true,false,true,true] },
+  '6m':{ labels:['Aug','Sep','Oct','Nov','Dec','Jan'], squat:[250,260,270,285,300,315], dead:[275,285,295,305,310,315], bench:[170,175,185,190,200,205], ohp:[100,105,108,112,115,120], mob:[60,62,65,68,71,74], sc:'315 lbs', sChg:'↑ +65', pc:'205 lbs', pChg:'↑ +35', streakSub:'14 of 24 weeks', prHits:Array.from({length:24},(_,i)=>i%3!==2) },
+  '1y':{ labels:['Q1','Q2','Q3','Q4'], squat:[230,255,285,315], dead:[250,275,300,315], bench:[165,180,195,205], ohp:[90,100,110,120], mob:[55,62,68,74], sc:'315 lbs', sChg:'↑ +85', pc:'205 lbs', pChg:'↑ +40', streakSub:'28 of 52 weeks', prHits:Array.from({length:52},(_,i)=>Math.sin(i)>0) },
+};
+let pActivePeriod = '3m';
+
+const pMobItems = [
+  {l:'Hip Flexion',s:82,c:''},{l:'Shoulder',s:70,c:'m'},{l:'Ankle',s:55,c:'w'},{l:'T-Spine',s:78,c:''},{l:'Hip Ext.',s:65,c:'m'},{l:'Wrist',s:80,c:''}
+];
+const pLifts = [
+  {n:'Back Squat',w:'315',u:'lbs',ch:'+35',d:[250,265,280,295,310,315]},
+  {n:'Deadlift',w:'385',u:'lbs',ch:'+40',d:[295,315,340,360,375,385]},
+  {n:'Bench Press',w:'225',u:'lbs',ch:'+20',d:[175,185,195,205,218,225]},
+  {n:'Pull-Up',w:'+55',u:'lbs',ch:'+10',d:[25,30,35,40,45,55]},
+  {n:'OHP',w:'135',u:'lbs',ch:'+15',d:[100,108,115,120,128,135]},
+];
+
+function pCurvePath(data, w, h, px, py) {
+  const mn = Math.min(...data)*0.97, mx = Math.max(...data)*1.015;
+  const xSt = (w-px*2)/(data.length-1);
+  const pts = data.map((v,i) => [px+i*xSt, py+(1-(v-mn)/(mx-mn))*(h-py*2)]);
+  let d = `M ${pts[0]}`;
+  for (let i=1;i<pts.length;i++){const[x0,y0]=pts[i-1],[x1,y1]=pts[i],cx=(x0+x1)/2; d+=` C ${cx},${y0} ${cx},${y1} ${x1},${y1}`; }
+  return {d, pts};
+}
+
+function pRenderChart(svgId, datasets, h, colors, areaColors) {
+  const svg = document.getElementById(svgId);
+  if (!svg) return;
+  const W=358, px=16, py=10;
+  svg.innerHTML = '';
+  // grid
+  for(let i=0;i<=3;i++){const y=py+(i/3)*(h-py*2);const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',px);l.setAttribute('x2',W-px);l.setAttribute('y1',y);l.setAttribute('y2',y);l.setAttribute('stroke','rgba(255,255,255,0.04)');l.setAttribute('stroke-width','1');svg.appendChild(l);}
+  datasets.forEach((data,di)=>{
+    const {d,pts}=pCurvePath(data,W,h,px,py);
+    const last=pts[pts.length-1],first=pts[0];
+    const area=document.createElementNS('http://www.w3.org/2000/svg','path');
+    area.setAttribute('d',d+` L ${last[0]},${h-py} L ${first[0]},${h-py} Z`);
+    area.setAttribute('fill',areaColors[di]);
+    svg.appendChild(area);
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',d);path.setAttribute('fill','none');path.setAttribute('stroke',colors[di]);
+    path.setAttribute('stroke-width','2');path.setAttribute('stroke-linecap','round');
+    path.style.strokeDasharray='2000';path.style.strokeDashoffset='2000';
+    path.style.transition=`stroke-dashoffset ${.75+di*.2}s cubic-bezier(.4,0,.2,1) ${di*.08}s`;
+    svg.appendChild(path);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{path.style.strokeDashoffset='0';}));
+    pts.forEach(([x,y],i)=>{
+      const isLast=i===pts.length-1;
+      const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',isLast?'4':'2.5');
+      c.setAttribute('fill',isLast?colors[di]:'var(--bg)');c.setAttribute('stroke',colors[di]);c.setAttribute('stroke-width',isLast?'0':'1.5');
+      c.style.opacity='0';c.style.transition=`opacity .28s ease ${.65+i*.05+di*.08}s`;
+      svg.appendChild(c);
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{c.style.opacity='1';}));
+    });
+  });
+}
+
+function pRenderXLabels(id, labels) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = labels.map(l=>`<span class="p-chart-xlabel">${l}</span>`).join('');
+}
+
+function pRenderPRBars(hits) {
+  const wrap = document.getElementById('pPRBars');
+  const lwrap = document.getElementById('pPRWLbls');
+  if (!wrap) return;
+  const slice = hits.slice(-12);
+  wrap.innerHTML = '';  lwrap.innerHTML = '';
+  slice.forEach((hit,i)=>{
+    const bar = document.createElement('div');
+    bar.className = 'p-pr-bar ' + (hit?'hit':'miss');
+    bar.style.height = '0';
+    wrap.appendChild(bar);
+    setTimeout(()=>{ bar.style.height=(hit?60+Math.random()*38:15+Math.random()*20)+'%'; bar.style.transition=`height .45s cubic-bezier(.34,1.2,.64,1) ${i*.04}s`; },50);
+    const lbl = document.createElement('span');
+    lbl.className = 'p-pr-wlbl';
+    lbl.textContent = 'W'+(slice.length-i);
+    lwrap.appendChild(lbl);
+  });
+}
+
+function pRenderMobGrid() {
+  const wrap = document.getElementById('pMobGrid');
+  if (!wrap) return;
+  wrap.innerHTML = pMobItems.map(m=>`
+    <div class="p-mob-item">
+      <div class="p-mob-label">${m.l}</div>
+      <div class="p-mob-track"><div class="p-mob-fill ${m.c}" style="width:0" data-w="${m.s}%"></div></div>
+      <div class="p-mob-score">${m.s}/100</div>
+    </div>`).join('');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    wrap.querySelectorAll('.p-mob-fill').forEach(el=>{el.style.width=el.dataset.w;});
+  }));
+}
+
+function pRenderLifts() {
+  const wrap = document.getElementById('pLiftRows');
+  if (!wrap) return;
+  wrap.innerHTML = pLifts.map((l,i)=>{
+    const pts = l.d;
+    const mn=Math.min(...pts)*.95,mx=Math.max(...pts)*1.02;
+    const xSt=44/(pts.length-1);
+    const sparkPts = pts.map((v,j)=>[j*xSt, 18-2-(v-mn)/(mx-mn)*14]);
+    let sd=`M ${sparkPts[0]}`;
+    for(let j=1;j<sparkPts.length;j++){const[x0,y0]=sparkPts[j-1],[x1,y1]=sparkPts[j],cx=(x0+x1)/2; sd+=` C ${cx},${y0} ${cx},${y1} ${x1},${y1}`;}
+    const lp=sparkPts[sparkPts.length-1];
+    return `<div class="p-lift-row">
+      <div class="p-lift-rank">${String(i+1).padStart(2,'0')}</div>
+      <div class="p-lift-name">${l.n}</div>
+      <div class="p-lift-wt">${l.w} <span style="font-size:9.5px;color:var(--text3)">${l.u}</span></div>
+      <div class="p-lift-chg" style="color:var(--teal)">↑ ${l.ch}</div>
+      <svg class="p-lift-spark" viewBox="0 0 44 20"><path d="${sd}" fill="none" stroke="var(--teal)" stroke-width="1.5" stroke-linecap="round"/><circle cx="${lp[0]}" cy="${lp[1]}" r="2" fill="var(--teal)"/></svg>
+    </div>`;
+  }).join('');
+}
+
+function pRenderAll() {
+  const p = PERIODS[pActivePeriod];
+  pRenderChart('pStrSvg',  [p.squat,p.dead],  110, ['var(--gold)','var(--teal)'],  ['rgba(212,168,75,.07)','rgba(78,201,176,.06)']);
+  pRenderChart('pPressSvg',[p.bench,p.ohp],   100, ['var(--gold)','var(--rose)'],  ['rgba(212,168,75,.07)','rgba(248,113,113,.06)']);
+  pRenderChart('pMobSvg',  [p.mob],             90, ['var(--teal)'],               ['rgba(78,201,176,.08)']);
+  pRenderXLabels('pStrXLbls',   p.labels);
+  pRenderXLabels('pPressXLbls', p.labels);
+  pRenderXLabels('pMobXLbls',   p.labels);
+  document.getElementById('pStrCur').textContent   = p.sc;
+  document.getElementById('pStrChg').textContent   = p.sChg;
+  document.getElementById('pPressCur').textContent = p.pc;
+  document.getElementById('pPressChg').textContent = p.pChg;
+  document.getElementById('pStreakSub').textContent= p.streakSub;
+  pRenderPRBars(p.prHits);
+  pRenderMobGrid();
+  pRenderLifts();
+}
+
+function pSetPeriod(period, btn) {
+  pActivePeriod = period;
+  document.querySelectorAll('.p-period-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  pRenderAll();
+}
+
+// home screen is content-only, no chart init needed
+</script>
+</body>
+</html>

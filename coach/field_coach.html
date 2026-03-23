@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Field — Coach Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   RESET & TOKENS
+═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #0f0f10;
+  --surface:     #17171a;
+  --surface2:    #1e1e22;
+  --surface3:    #26262c;
+  --surface4:    #2e2e36;
+  --border:      #2a2a32;
+  --border-lt:   #36363f;
+  --text:        #e8e8ec;
+  --text-m:      #72727e;
+  --text-d:      #46454f;
+  --text-dd:     #28272f;
+  --accent:      #c8f53e;
+  --accent-dim:  rgba(200,245,62,0.11);
+  --accent-glow: rgba(200,245,62,0.20);
+  --red:         #ff5e57;
+  --red-dim:     rgba(255,94,87,0.12);
+  --blue:        #4fa3ff;
+  --blue-dim:    rgba(79,163,255,0.11);
+  --orange:      #ff9940;
+  --orange-dim:  rgba(255,153,64,0.11);
+  --purple:      #b78aff;
+  --purple-dim:  rgba(183,138,255,0.11);
+  --teal:        #3dd9c1;
+  --teal-dim:    rgba(61,217,193,0.11);
+  --gold:        #d4a84b;
+  --gold-dim:    rgba(212,168,75,0.12);
+  --ff:  'DM Sans', sans-serif;
+  --ffc: 'Syne', sans-serif;
+  --ffm: 'DM Mono', monospace;
+  --r:   8px;
+  --rlg: 12px;
+  --nav-w: 220px;
+}
+
+html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--ff); font-size: 13px; -webkit-font-smoothing: antialiased; }
+
+/* ═══════════════════════════════════════════
+   LAYOUT SHELL
+═══════════════════════════════════════════ */
+.shell { display: flex; height: 100vh; overflow: hidden; }
+
+/* ── LEFT NAV ─── */
+.left-nav {
+  width: var(--nav-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.nav-logo {
+  padding: 18px 20px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.logo-mark {
+  width: 30px; height: 30px;
+  background: var(--accent);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ffc);
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f0f10;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+.logo-text { font-family: var(--ffc); font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
+.logo-text span { color: var(--text-m); font-weight: 400; font-size: 11px; display: block; letter-spacing: 0.05em; font-family: var(--ffm); }
+
+.nav-section-label {
+  font-family: var(--ffm);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-d);
+  padding: 14px 20px 6px;
+}
+.nav-scroll { flex: 1; overflow-y: auto; padding: 6px 0; }
+.nav-scroll::-webkit-scrollbar { width: 3px; }
+.nav-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 20px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.14s;
+  user-select: none;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  color: var(--text-m);
+  font-family: var(--ff);
+  font-size: 13px;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--accent-dim); color: var(--accent); }
+.nav-item.active::before { content:''; position:absolute;left:0;top:4px;bottom:4px;width:2px;background:var(--accent);border-radius:0 2px 2px 0; }
+.nav-item svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.nav-item-badge { margin-left: auto; font-family: var(--ffm); font-size: 9.5px; padding: 1px 6px; border-radius: 10px; background: var(--surface3); color: var(--text-d); }
+.nav-item.active .nav-item-badge { background: var(--accent-dim); color: var(--accent); }
+
+.nav-footer {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.nav-user {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 8px;
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: background 0.14s;
+}
+.nav-user:hover { background: var(--surface2); }
+.nav-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4fa3ff, #b78aff);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: white;
+  flex-shrink: 0;
+  font-family: var(--ffc);
+}
+.nav-user-info { flex: 1; min-width: 0; }
+.nav-user-name { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-user-role { font-size: 10px; color: var(--text-d); font-family: var(--ffm); letter-spacing: 0.05em; }
+.athlete-view-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(200,245,62,0.2);
+  border-radius: var(--r);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--ff);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+.athlete-view-btn:hover { background: rgba(200,245,62,0.18); border-color: rgba(200,245,62,0.35); }
+.athlete-view-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── MAIN AREA ─── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+/* top bar */
+.topbar {
+  height: 48px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 24px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.topbar-title { font-family: var(--ffc); font-weight: 700; font-size: 14px; letter-spacing: -0.2px; }
+.topbar-sub { font-family: var(--ffm); font-size: 10px; color: var(--text-d); margin-top: 1px; }
+.topbar-sep { flex: 1; }
+.tb-badge { font-family: var(--ffm); font-size: 10px; padding: 2px 8px; border-radius: 20px; letter-spacing: 0.05em; font-weight: 500; }
+.tb-green { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(200,245,62,0.25); }
+.tb-muted { background: var(--surface3); color: var(--text-m); border: 1px solid var(--border); }
+.tb-btn {
+  padding: 5px 12px; border-radius: var(--r);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: var(--ff); border: none;
+  transition: all 0.14s; display: flex; align-items: center; gap: 6px;
+}
+.tb-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tb-btn-ghost { background: var(--surface2); color: var(--text-m); border: 1px solid var(--border); }
+.tb-btn-ghost:hover { background: var(--surface3); color: var(--text); }
+.tb-btn-primary { background: var(--accent); color: #0f0f10; font-weight: 700; }
+.tb-btn-primary:hover { background: #d4f85a; }
+
+/* page content */
+.page { flex: 1; overflow-y: auto; display: none; }
+.page.active { display: flex; flex-direction: column; }
+.page::-webkit-scrollbar { width: 4px; }
+.page::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ═══════════════════════════════════════════
+   PAGE: DASHBOARD
+═══════════════════════════════════════════ */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 12px;
+  padding: 20px 24px 0;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rlg);
+  padding: 16px 16px 14px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: var(--rlg) var(--rlg) 0 0;
+}
+.sc-lime::before   { background: linear-gradient(90deg, var(--accent), transparent); }
+.sc-blue::before   { background: linear-gradient(90deg, var(--blue),   transparent); }
+.sc-orange::before { background: linear-gradient(90deg, var(--orange), transparent); }
+.sc-teal::before   { background: linear-gradient(90deg, var(--teal),   transparent); }
+.stat-label { font-family: var(--ffm); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-d); margin-bottom: 8px; }
+.stat-value { font-family: var(--ffc); font-size: 34px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; margin-bottom: 5px; }
+.stat-sub   { font-size: 11px; color: var(--text-m); }
+.stat-delta { font-size: 11px; font-weight: 600; margin-top: 3px; }
+.delta-up { color: var(--accent); }
+.delta-dn { color: var(--red); }
+
+/* Two-col below stats */
+.dash-mid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 12px;
+  padding: 12px 24px 0;
+}
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rlg);
+  overflow: hidden;
+}
+.panel-hd {
+  padding: 14px 16px 11px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-title { font-family: var(--ffc); font-size: 13px; font-weight: 700; letter-spacing: -0.2px; }
+.panel-sub { font-size: 11px; color: var(--text-d); font-family: var(--ffm); margin-left: auto; }
+
+/* Activity feed */
+.feed-item {
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.feed-item:last-child { border-bottom: none; }
+.feed-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.feed-text { flex: 1; font-size: 12px; color: var(--text-m); line-height: 1.4; }
+.feed-text strong { color: var(--text); font-weight: 600; }
+.feed-time { font-family: var(--ffm); font-size: 10px; color: var(--text-d); flex-shrink: 0; }
+
+/* Mini athlete list */
+.mini-athlete {
+  padding: 9px 16px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.13s;
+}
+.mini-athlete:hover { background: var(--surface2); }
+.mini-athlete:last-child { border-bottom: none; }
+.ma-av {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+  font-family: var(--ffc);
+  flex-shrink: 0;
+}
+.ma-name { font-size: 12.5px; font-weight: 600; flex: 1; }
+.ma-status { font-family: var(--ffm); font-size: 9.5px; padding: 1px 6px; border-radius: 10px; }
+.mas-green { background: var(--accent-dim); color: var(--accent); }
+.mas-blue  { background: var(--blue-dim);   color: var(--blue); }
+.mas-muted { background: var(--surface3);   color: var(--text-d); }
+
+/* Upcoming */
+.upcoming-item {
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.upcoming-item:last-child { border-bottom: none; }
+.upcoming-date { font-family: var(--ffm); font-size: 10px; color: var(--text-d); width: 36px; flex-shrink: 0; line-height: 1.4; text-transform: uppercase; }
+.upcoming-info { flex: 1; }
+.upcoming-name { font-size: 12.5px; font-weight: 600; margin-bottom: 1px; }
+.upcoming-meta { font-size: 11px; color: var(--text-d); }
+.upcoming-badge { font-family: var(--ffm); font-size: 9.5px; padding: 2px 7px; border-radius: 10px; flex-shrink: 0; }
+
+.dash-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 12px 24px 24px;
+}
+
+/* ═══════════════════════════════════════════
+   PAGE: ROSTER
+═══════════════════════════════════════════ */
+.roster-toolbar {
+  padding: 16px 24px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.search-wrap {
+  flex: 1;
+  max-width: 320px;
+  position: relative;
+}
+.search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; stroke: var(--text-d); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.search-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 7px 12px 7px 32px;
+  font-family: var(--ff);
+  font-size: 12.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-input::placeholder { color: var(--text-d); }
+.search-input:focus { border-color: var(--border-lt); }
+
+.filter-chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-m);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.13s;
+}
+.filter-chip.sel { background: var(--accent-dim); color: var(--accent); border-color: rgba(200,245,62,0.25); }
+.filter-chip:hover:not(.sel) { border-color: var(--border-lt); color: var(--text); }
+
+/* Roster table */
+.roster-table-wrap { flex: 1; overflow-y: auto; padding: 0 24px 24px; }
+.roster-table-wrap::-webkit-scrollbar { width: 4px; }
+.roster-table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.roster-table { width: 100%; border-collapse: collapse; }
+.roster-table thead th {
+  padding: 8px 14px;
+  text-align: left;
+  font-family: var(--ffm);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-d);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky; top: 0; z-index: 2;
+}
+.roster-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.roster-table tbody tr:hover { background: var(--surface2); }
+.roster-table tbody tr:last-child { border-bottom: none; }
+.roster-table tbody td { padding: 11px 14px; vertical-align: middle; }
+
+.rt-athlete { display: flex; align-items: center; gap: 9px; }
+.rt-av {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; font-family: var(--ffc);
+  flex-shrink: 0;
+}
+.rt-name { font-size: 13px; font-weight: 600; }
+.rt-handle { font-size: 10.5px; color: var(--text-d); font-family: var(--ffm); }
+
+.pill { font-family: var(--ffm); font-size: 10px; padding: 2px 8px; border-radius: 10px; letter-spacing: 0.04em; display: inline-block; }
+.pill-green  { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(200,245,62,.2); }
+.pill-blue   { background: var(--blue-dim);   color: var(--blue);   border: 1px solid rgba(79,163,255,.2); }
+.pill-orange { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(255,153,64,.2); }
+.pill-red    { background: var(--red-dim);    color: var(--red);    border: 1px solid rgba(255,94,87,.2); }
+.pill-muted  { background: var(--surface3);   color: var(--text-d); border: 1px solid var(--border); }
+.pill-teal   { background: var(--teal-dim);   color: var(--teal);   border: 1px solid rgba(61,217,193,.2); }
+.pill-gold   { background: var(--gold-dim);   color: var(--gold);   border: 1px solid rgba(212,168,75,.2); }
+
+.spark-cell { width: 80px; }
+.spark-svg  { width: 80px; height: 24px; display: block; }
+
+.progress-bar-cell { width: 120px; }
+.mini-bar-track { height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+.mini-bar-fill  { height: 100%; background: var(--accent); border-radius: 2px; }
+.mini-bar-fill.warn { background: var(--orange); }
+.mini-bar-fill.alert { background: var(--red); }
+
+/* ═══════════════════════════════════════════
+   PAGE: ATHLETE DETAIL
+═══════════════════════════════════════════ */
+.detail-header {
+  padding: 20px 24px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.detail-av {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ffc); font-size: 20px; font-weight: 800;
+  flex-shrink: 0;
+}
+.detail-info { flex: 1; }
+.detail-name { font-family: var(--ffc); font-size: 22px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 3px; }
+.detail-meta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.detail-meta-item { font-size: 11.5px; color: var(--text-m); font-family: var(--ffm); display: flex; align-items: center; gap: 4px; }
+.detail-actions { display: flex; gap: 8px; margin-top: 2px; }
+
+.detail-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-content: start;
+}
+.detail-body::-webkit-scrollbar { width: 4px; }
+.detail-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.detail-full { grid-column: 1 / -1; }
+
+/* Lift row inside detail */
+.d-lift-row {
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.d-lift-row:last-child { border-bottom: none; }
+.d-lift-name { flex: 1; font-size: 12.5px; font-weight: 500; }
+.d-lift-wt { font-family: var(--ffm); font-size: 13px; color: var(--text); width: 60px; text-align: right; }
+.d-lift-chg { font-size: 11px; font-weight: 600; width: 50px; text-align: right; }
+.d-lift-spark { width: 52px; height: 20px; margin-left: 8px; flex-shrink: 0; }
+
+/* Compliance dots */
+.comp-dots { display: flex; gap: 5px; flex-wrap: wrap; padding: 12px 14px; }
+.comp-dot {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ffm); font-size: 9px;
+  cursor: default;
+  transition: transform 0.1s;
+}
+.comp-dot:hover { transform: scale(1.1); }
+.cd-done   { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(200,245,62,.25); }
+.cd-miss   { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,94,87,.2); }
+.cd-rest   { background: var(--surface3); color: var(--text-d); border: 1px solid var(--border); }
+.cd-future { background: var(--surface2); color: var(--text-dd); border: 1px dashed var(--border); }
+
+/* ═══════════════════════════════════════════
+   PAGE: PROGRAM BUILDER (Coach OS embedded)
+═══════════════════════════════════════════ */
+.program-builder-frame {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Re-used Coach OS styles scoped inside builder */
+.coahos-layout { display: flex; flex: 1; overflow: hidden; }
+.coahos-sidebar {
+  width: 188px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  flex-shrink: 0; overflow: hidden;
+}
+.coahos-sh { padding: 12px 14px 8px; font-size: 9.5px; font-family: var(--ffm); letter-spacing: 0.12em; color: var(--text-d); text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.coahos-sidebar-scroll { overflow-y: auto; flex: 1; padding: 6px 0; }
+.coahos-sidebar-scroll::-webkit-scrollbar { width: 3px; }
+.coahos-sidebar-scroll::-webkit-scrollbar-thumb { background: var(--border); }
+.wk-item {
+  padding: 7px 14px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 7px;
+  transition: background 0.14s;
+  position: relative;
+  user-select: none;
+  border: none; background: transparent; width: 100%; text-align: left;
+}
+.wk-item:hover { background: var(--surface2); }
+.wk-item.active { background: var(--accent-dim); }
+.wk-item.active::before { content:''; position:absolute;left:0;top:3px;bottom:3px;width:2px;background:var(--accent);border-radius:0 2px 2px 0; }
+.wk-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.wk-dot-a { background: var(--accent); }
+.wk-dot-m { background: var(--surface4); }
+.wk-num { font-family: var(--ffm); font-size: 10px; font-weight: 500; color: var(--accent); flex-shrink: 0; }
+.wk-item:not(.active) .wk-num { color: var(--text-d); }
+.wk-label { font-size: 12px; color: var(--text-m); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wk-item.active .wk-label { color: var(--accent); opacity: .8; }
+.coahos-sf { padding: 8px 10px; border-top: 1px solid var(--border); }
+.add-wk-btn {
+  width: 100%; padding: 6px 10px;
+  background: transparent; border: 1px dashed var(--border-lt);
+  border-radius: var(--r); color: var(--text-m); font-size: 11px;
+  font-family: var(--ff); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  transition: all 0.14s;
+}
+.add-wk-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+/* Main builder panel */
+.coahos-main {
+  flex: 1; overflow-y: auto; padding: 20px 22px;
+  background: var(--bg); min-width: 0;
+}
+.coahos-main::-webkit-scrollbar { width: 4px; }
+.coahos-main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.wk-title { font-family: var(--ffc); font-weight: 700; font-size: 20px; letter-spacing: -0.4px; margin-bottom: 3px; display: flex; align-items: center; gap: 8px; }
+.wk-title-tag { font-family: var(--ffm); font-size: 9.5px; padding: 2px 7px; background: var(--surface3); color: var(--text-m); border-radius: 4px; letter-spacing: 0.1em; font-weight: 400; }
+.wk-meta { font-family: var(--ffm); font-size: 10px; color: var(--text-d); margin-bottom: 18px; display: flex; gap: 10px; }
+
+/* Day card */
+.day-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rlg);
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color 0.18s;
+}
+.day-card:hover { border-color: var(--border-lt); }
+.day-card.focused { border-color: rgba(200,245,62,.3); }
+.day-hd {
+  padding: 11px 14px;
+  display: flex; align-items: center; gap: 9px;
+  cursor: pointer; background: var(--surface);
+  user-select: none; transition: background 0.13s;
+}
+.day-hd:hover { background: var(--surface2); }
+.day-chev { width: 15px; height: 15px; color: var(--text-d); transition: transform 0.18s; flex-shrink: 0; }
+.day-chev svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.day-card.open .day-chev { transform: rotate(90deg); }
+.day-label { font-family: var(--ffc); font-weight: 700; font-size: 13.5px; letter-spacing: -0.2px; }
+.day-sub { font-size: 10.5px; color: var(--text-m); font-family: var(--ffm); margin-top: 1px; }
+.day-pills { margin-left: auto; display: flex; gap: 5px; }
+.day-pill { font-size: 9.5px; font-family: var(--ffm); padding: 1px 7px; border-radius: 20px; letter-spacing: 0.05em; }
+.dp-str  { background: rgba(79,163,255,.12); color: var(--blue); border: 1px solid rgba(79,163,255,.2); }
+.dp-cond { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(255,153,64,.2); }
+.dp-prep { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(61,217,193,.2); }
+.dp-rest { background: var(--surface3); color: var(--text-d); border: 1px solid var(--border); }
+.day-body { display: none; padding: 0 14px 14px; border-top: 1px solid var(--border); }
+.day-card.open .day-body { display: block; }
+
+/* Editor toolbar */
+.editor-toolbar {
+  display: flex; gap: 2px;
+  padding: 7px 0 5px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 9px;
+}
+.tb-btn2 {
+  padding: 3px 8px; background: transparent; border: none; color: var(--text-d);
+  cursor: pointer; border-radius: 4px; font-size: 10.5px; font-family: var(--ffm);
+  font-weight: 500; letter-spacing: 0.02em; transition: all 0.12s;
+}
+.tb-btn2:hover { background: var(--surface3); color: var(--text); }
+.tb-sep { width: 1px; height: 18px; background: var(--border); margin: 3px 3px; align-self: center; }
+.ib-prep  { padding: 3px 7px; font-family: var(--ffm); font-size: 9.5px; border: none; border-radius: 4px; cursor: pointer; transition: all .12s; background: var(--teal-dim); color: var(--teal); }
+.ib-str   { padding: 3px 7px; font-family: var(--ffm); font-size: 9.5px; border: none; border-radius: 4px; cursor: pointer; transition: all .12s; background: var(--blue-dim); color: var(--blue); }
+.ib-cond  { padding: 3px 7px; font-family: var(--ffm); font-size: 9.5px; border: none; border-radius: 4px; cursor: pointer; transition: all .12s; background: var(--orange-dim); color: var(--orange); }
+.ib-prep:hover { background: rgba(61,217,193,.2); }
+.ib-str:hover  { background: rgba(79,163,255,.2); }
+.ib-cond:hover { background: rgba(255,153,64,.2); }
+
+/* Editor area */
+.editor-area {
+  min-height: 120px; outline: none; font-family: var(--ffm); font-size: 12px; line-height: 1.75;
+  color: var(--text); caret-color: var(--accent); white-space: pre-wrap; word-break: break-word;
+}
+.editor-area:empty::before { content: attr(data-ph); color: var(--text-d); pointer-events: none; font-style: italic; }
+
+/* Parsed right panel */
+.coahos-right {
+  width: 290px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  flex-shrink: 0; overflow: hidden;
+}
+.coahos-rh {
+  padding: 12px 14px 9px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 7px;
+}
+.coahos-rt { font-family: var(--ffc); font-weight: 700; font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-m); }
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-left: auto; box-shadow: 0 0 6px var(--accent-glow); animation: pls 2s ease-in-out infinite; }
+@keyframes pls { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)} }
+.coahos-rscroll { overflow-y: auto; flex: 1; padding: 10px; }
+.coahos-rscroll::-webkit-scrollbar { width: 3px; }
+.coahos-rscroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Parsed blocks */
+.parsed-day-sec { margin-bottom: 14px; }
+.parsed-day-lbl { font-family: var(--ffc); font-weight: 700; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-m); margin-bottom: 7px; display: flex; align-items: center; gap: 5px; }
+.parsed-day-lbl::after { content:''; flex:1; height:1px; background:var(--border); }
+.parsed-block { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 7px; position: relative; overflow: hidden; transition: border-color .14s; }
+.parsed-block:hover { border-color: var(--border-lt); }
+.parsed-block::before { content:''; position:absolute;left:0;top:0;bottom:0;width:2px;z-index:1; }
+.pb-prep::before  { background: var(--teal); }
+.pb-str::before   { background: var(--blue); }
+.pb-cond::before  { background: var(--orange); }
+.pb-other::before { background: var(--text-d); }
+.pb-head { display: flex; align-items: center; gap: 5px; padding: 7px 9px 5px; border-bottom: 1px solid var(--border); }
+.pb-icon { font-family: var(--ffm); font-size: 9.5px; flex-shrink: 0; }
+.pb-prep  .pb-icon { color: var(--teal); }
+.pb-str   .pb-icon { color: var(--blue); }
+.pb-cond  .pb-icon { color: var(--orange); }
+.pb-other .pb-icon { color: var(--text-d); }
+.pb-name-input {
+  font-family: var(--ffm); font-size: 9.5px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+  background: transparent; border: none; outline: none; color: var(--text-m); flex: 1; min-width: 30px;
+  cursor: text; padding: 1px 3px; border-radius: 3px; transition: background .12s, color .12s;
+}
+.pb-name-input:hover { background: var(--surface3); color: var(--text); }
+.pb-name-input:focus { background: var(--surface3); color: var(--accent); }
+.pb-count { font-family: var(--ffm); font-size: 9px; color: var(--text-d); flex-shrink: 0; }
+.pb-del { width: 16px; height: 16px; background: transparent; border: none; border-radius: 3px; cursor: pointer; color: var(--text-d); font-size: 10px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: all .12s; flex-shrink: 0; }
+.parsed-block:hover .pb-del { opacity: 1; }
+.pb-del:hover { background: var(--red-dim); color: var(--red); }
+.ex-row {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 9px; border-bottom: 1px solid rgba(46,46,54,.5);
+  transition: background .1s; cursor: grab; position: relative;
+}
+.ex-row:last-child { border-bottom: none; }
+.ex-row:hover { background: var(--surface3); }
+.ex-row.dragging { opacity: .3; }
+.ex-row.drag-over { background: var(--accent-dim); outline: 1px dashed rgba(200,245,62,.3); }
+.drag-hndl { font-size: 9.5px; color: var(--text-d); opacity: 0; transition: opacity .12s; flex-shrink: 0; cursor: grab; user-select: none; letter-spacing: -1px; width: 11px; }
+.ex-row:hover .drag-hndl { opacity: 1; }
+.ex-nm { flex: 1; font-size: 11px; color: var(--text); font-weight: 400; line-height: 1.35; min-width: 0; }
+.ex-det { font-family: var(--ffm); font-size: 9.5px; color: var(--text-m); white-space: nowrap; background: var(--surface3); padding: 1px 5px; border-radius: 3px; border: 1px solid var(--border); flex-shrink: 0; }
+.ex-det.emom     { color: var(--purple); border-color: rgba(183,138,255,.2); background: var(--purple-dim); }
+.ex-det.amrap    { color: var(--orange); border-color: rgba(255,153,64,.2); background: var(--orange-dim); }
+.ex-det.interval { color: var(--teal); border-color: rgba(61,217,193,.2); background: var(--teal-dim); }
+.ex-mv-btn { width: 16px; height: 16px; background: transparent; border: none; border-radius: 3px; cursor: pointer; color: var(--text-d); font-size: 11px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: all .12s; flex-shrink: 0; }
+.ex-row:hover .ex-mv-btn { opacity: 1; }
+.ex-mv-btn:hover { background: var(--surface3); color: var(--text-m); }
+.move-dd { position: absolute; right: 6px; top: calc(100% + 2px); background: var(--surface2); border: 1px solid var(--border-lt); border-radius: var(--r); box-shadow: 0 8px 24px rgba(0,0,0,.4); z-index: 300; min-width: 150px; overflow: hidden; animation: ddFd .12s ease; }
+@keyframes ddFd { from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)} }
+.move-dd-hd { padding: 5px 9px 3px; font-family: var(--ffm); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-d); border-bottom: 1px solid var(--border); }
+.move-dd-item { padding: 7px 9px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-m); transition: background .1s; }
+.move-dd-item:hover { background: var(--surface3); color: var(--text); }
+.mdd-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.block-drop-zone { min-height: 7px; transition: min-height .14s, background .14s; }
+.block-drop-zone.dov { min-height: 26px; background: var(--accent-dim); border-top: 1px dashed rgba(200,245,62,.3); display: flex; align-items: center; justify-content: center; font-family: var(--ffm); font-size: 9px; color: var(--accent); letter-spacing: .08em; }
+.meta-chip { font-family: var(--ffm); font-size: 9px; padding: 2px 5px; border-radius: 3px; color: var(--text-m); background: var(--surface3); border: 1px solid var(--border); letter-spacing: .05em; }
+.meta-chip.hl { color: var(--accent); border-color: rgba(200,245,62,.2); background: var(--accent-dim); }
+.block-meta-row { display: flex; gap: 4px; padding: 4px 9px; flex-wrap: wrap; border-bottom: 1px solid rgba(46,46,54,.5); }
+
+/* Parsed stats */
+.coahos-stats { border-top: 1px solid var(--border); padding: 9px 10px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.cos-stat { text-align: center; padding: 5px 4px; background: var(--surface2); border-radius: var(--r); border: 1px solid var(--border); }
+.cos-num { font-family: var(--ffc); font-weight: 700; font-size: 16px; color: var(--text); line-height: 1; margin-bottom: 2px; }
+.cos-lbl { font-family: var(--ffm); font-size: 8px; color: var(--text-d); letter-spacing: .08em; text-transform: uppercase; }
+.add-day-btn2 { width: 100%; padding: 8px; background: transparent; border: 1px dashed var(--border); border-radius: var(--rlg); color: var(--text-d); font-size: 11.5px; font-family: var(--ff); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all .14s; margin-top: 4px; }
+.add-day-btn2:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+/* ═══════════════════════════════════════════
+   MISC UTILS
+═══════════════════════════════════════════ */
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-d); }
+.empty-state svg { width: 32px; height: 32px; margin-bottom: 10px; opacity: .3; stroke: var(--text-d); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.empty-state p { font-size: 12px; font-family: var(--ffm); line-height: 1.6; }
+.back-btn { background: transparent; border: none; color: var(--text-m); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px; padding: 4px 0; transition: color .13s; font-family: var(--ff); }
+.back-btn:hover { color: var(--accent); }
+.back-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+* { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ══════════════════════════════════════
+     LEFT NAV
+══════════════════════════════════════ -->
+<nav class="left-nav">
+  <div class="nav-logo">
+    <div class="logo-mark">F</div>
+    <div class="logo-text">Field <span>COACH PORTAL</span></div>
+  </div>
+  <div class="nav-scroll">
+    <div class="nav-section-label">Menu</div>
+    <button class="nav-item active" id="nav-dashboard" onclick="goPage('dashboard')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" id="nav-roster" onclick="goPage('roster')">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Roster
+      <span class="nav-item-badge">12</span>
+    </button>
+    <button class="nav-item" id="nav-programs" onclick="goPage('programs')">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Program Builder
+    </button>
+    <button class="nav-item" id="nav-athlete" onclick="goPage('athlete-detail')" style="display:none">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Athlete Detail
+    </button>
+    <div class="nav-section-label" style="margin-top:6px">Analytics</div>
+    <button class="nav-item" id="nav-compliance" onclick="goPage('dashboard')">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Compliance
+      <span class="nav-item-badge">Soon</span>
+    </button>
+    <button class="nav-item" id="nav-progress" onclick="goPage('dashboard')">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Progress Reports
+      <span class="nav-item-badge">Soon</span>
+    </button>
+  </div>
+  <div class="nav-footer">
+    <div class="nav-user">
+      <div class="nav-avatar">SC</div>
+      <div class="nav-user-info">
+        <div class="nav-user-name">Sarah Chen</div>
+        <div class="nav-user-role">HEAD COACH</div>
+      </div>
+    </div>
+    <a href="field_app.html" target="_blank" class="athlete-view-btn">
+      <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Open Athlete View
+    </a>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════ -->
+<div class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar" id="topbar">
+    <div><div class="topbar-title" id="topbar-title">Dashboard</div><div class="topbar-sub" id="topbar-sub">Mon 22 Mar · Week 3</div></div>
+    <div class="topbar-sep"></div>
+    <span class="tb-badge tb-green">● 8 active athletes</span>
+    <span class="tb-badge tb-muted">Block A · Hypertrophy</span>
+    <button class="tb-btn tb-btn-ghost" id="topbar-action-2">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Search
+    </button>
+    <button class="tb-btn tb-btn-primary" id="topbar-action-1" onclick="goPage('programs')">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Program
+    </button>
+  </div>
+
+  <!-- ── PAGE: DASHBOARD ── -->
+  <div class="page active" id="page-dashboard">
+    <div class="dash-grid">
+      <div class="stat-card sc-lime">
+        <div class="stat-label">Active Athletes</div>
+        <div class="stat-value" style="color:var(--accent)">8</div>
+        <div class="stat-sub">of 12 total</div>
+        <div class="stat-delta delta-up">↑ 2 started this week</div>
+      </div>
+      <div class="stat-card sc-blue">
+        <div class="stat-label">Avg Compliance</div>
+        <div class="stat-value" style="color:var(--blue)">84<span style="font-size:18px">%</span></div>
+        <div class="stat-sub">last 4 weeks</div>
+        <div class="stat-delta delta-up">↑ +6% vs last block</div>
+      </div>
+      <div class="stat-card sc-orange">
+        <div class="stat-label">Sessions Logged</div>
+        <div class="stat-value" style="color:var(--orange)">47</div>
+        <div class="stat-sub">this week</div>
+        <div class="stat-delta delta-dn">↓ 3 missed check-ins</div>
+      </div>
+      <div class="stat-card sc-teal">
+        <div class="stat-label">PRs This Month</div>
+        <div class="stat-value" style="color:var(--teal)">23</div>
+        <div class="stat-sub">across all athletes</div>
+        <div class="stat-delta delta-up">↑ Best month yet</div>
+      </div>
+    </div>
+
+    <div class="dash-mid">
+      <!-- Activity feed -->
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">Activity Feed</div><div class="panel-sub">Today</div></div>
+        <div class="feed-item"><div class="feed-dot" style="background:var(--accent)"></div><div class="feed-text"><strong>Marcus R.</strong> logged Upper Strength — 4×5 Bench @ 185 lbs <span style="color:var(--accent)">★ PR</span></div><div class="feed-time">9:41</div></div>
+        <div class="feed-item"><div class="feed-dot" style="background:var(--blue)"></div><div class="feed-text"><strong>Jamie T.</strong> completed Week 3 Day 2 — all sets confirmed</div><div class="feed-time">8:55</div></div>
+        <div class="feed-item"><div class="feed-dot" style="background:var(--orange)"></div><div class="feed-text"><strong>Alex K.</strong> skipped conditioning block — noted shoulder tightness</div><div class="feed-time">8:30</div></div>
+        <div class="feed-item"><div class="feed-dot" style="background:var(--teal)"></div><div class="feed-text"><strong>Dana M.</strong> mobility score improved to 78 <span style="color:var(--teal)">+4 pts</span></div><div class="feed-time">8:10</div></div>
+        <div class="feed-item"><div class="feed-dot" style="background:var(--purple)"></div><div class="feed-text"><strong>Chris L.</strong> logged Lower Strength — Deadlift 3×5 @ 315 lbs</div><div class="feed-time">7:48</div></div>
+        <div class="feed-item"><div class="feed-dot" style="background:var(--accent)"></div><div class="feed-text"><strong>Priya S.</strong> logged Full Body session — all blocks complete</div><div class="feed-time">7:22</div></div>
+        <div class="feed-item"><div class="feed-dot" style="background:var(--text-d)"></div><div class="feed-text"><strong>Sam B.</strong> rest day — no session scheduled</div><div class="feed-time">Yesterday</div></div>
+      </div>
+
+      <!-- Mini roster panel -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="panel">
+          <div class="panel-hd"><div class="panel-title">Today's Athletes</div><div class="panel-sub" style="cursor:pointer;color:var(--accent)" onclick="goPage('roster')">View all →</div></div>
+          <div class="mini-athlete" onclick="openAthleteDetail('Marcus R.','MR','#4fa3ff')"><div class="ma-av" style="background:rgba(79,163,255,.15);color:var(--blue)">MR</div><div class="ma-name">Marcus R.</div><span class="ma-status mas-green">✓ Logged</span></div>
+          <div class="mini-athlete" onclick="openAthleteDetail('Jamie T.','JT','#3dd9c1')"><div class="ma-av" style="background:rgba(61,217,193,.15);color:var(--teal)">JT</div><div class="ma-name">Jamie T.</div><span class="ma-status mas-green">✓ Logged</span></div>
+          <div class="mini-athlete" onclick="openAthleteDetail('Alex K.','AK','#ff9940')"><div class="ma-av" style="background:rgba(255,153,64,.15);color:var(--orange)">AK</div><div class="ma-name">Alex K.</div><span class="ma-status mas-blue">▶ In progress</span></div>
+          <div class="mini-athlete" onclick="openAthleteDetail('Dana M.','DM','#b78aff')"><div class="ma-av" style="background:rgba(183,138,255,.15);color:var(--purple)">DM</div><div class="ma-name">Dana M.</div><span class="ma-status mas-muted">— Scheduled</span></div>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><div class="panel-title">Upcoming</div></div>
+          <div class="upcoming-item"><div class="upcoming-date">MON<br>22</div><div class="upcoming-info"><div class="upcoming-name">Block A Check-In</div><div class="upcoming-meta">8 athletes · Week 3 review</div></div><span class="pill pill-blue">Today</span></div>
+          <div class="upcoming-item"><div class="upcoming-date">WED<br>24</div><div class="upcoming-info"><div class="upcoming-name">Block B Kickoff</div><div class="upcoming-meta">Program publish due</div></div><span class="pill pill-orange">2 days</span></div>
+          <div class="upcoming-item"><div class="upcoming-date">FRI<br>26</div><div class="upcoming-info"><div class="upcoming-name">Deload Week Starts</div><div class="upcoming-meta">Auto-schedule active</div></div><span class="pill pill-muted">4 days</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compliance overview -->
+    <div class="dash-bottom">
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">Compliance Overview</div><div class="panel-sub">Last 12 sessions</div></div>
+        <div style="padding:12px 14px">
+          <div id="dashComplianceRows"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">Strength Highlights</div><div class="panel-sub">This week</div></div>
+        <div id="dashStrengthRows"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: ROSTER ── -->
+  <div class="page" id="page-roster">
+    <div class="roster-toolbar">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" placeholder="Search athletes…" oninput="filterRoster(this.value)">
+      </div>
+      <button class="filter-chip sel" onclick="setFilter('all',this)">All</button>
+      <button class="filter-chip" onclick="setFilter('active',this)">Active</button>
+      <button class="filter-chip" onclick="setFilter('behind',this)">Behind</button>
+      <button class="filter-chip" onclick="setFilter('deload',this)">Deload</button>
+      <div style="flex:1"></div>
+      <button class="tb-btn tb-btn-primary" style="margin-left:8px">
+        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Athlete
+      </button>
+    </div>
+    <div class="roster-table-wrap">
+      <table class="roster-table" id="rosterTable">
+        <thead>
+          <tr>
+            <th>Athlete</th>
+            <th>Program</th>
+            <th>Week</th>
+            <th>Status</th>
+            <th>Compliance</th>
+            <th>Last Session</th>
+            <th>Strength Trend</th>
+            <th>PRs</th>
+          </tr>
+        </thead>
+        <tbody id="rosterBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── PAGE: ATHLETE DETAIL ── -->
+  <div class="page" id="page-athlete-detail">
+    <div class="detail-header">
+      <div style="padding-top:4px"><button class="back-btn" onclick="goPage('roster')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Roster</button></div>
+      <div class="detail-av" id="d-av" style="background:rgba(79,163,255,.15);color:var(--blue)">MR</div>
+      <div class="detail-info">
+        <div class="detail-name" id="d-name">Marcus R.</div>
+        <div class="detail-meta">
+          <span class="detail-meta-item">📍 Block A · Week 3</span>
+          <span class="detail-meta-item">⬆ 84% compliance</span>
+          <span class="detail-meta-item">★ 2 PRs this month</span>
+          <span class="pill pill-green" style="font-size:10px">Active</span>
+        </div>
+        <div class="detail-actions" style="margin-top:10px">
+          <button class="tb-btn tb-btn-ghost">Message</button>
+          <button class="tb-btn tb-btn-ghost" onclick="goPage('programs')">Edit Program</button>
+          <button class="tb-btn tb-btn-primary">Log Note</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <!-- Compliance dots full -->
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">Session Compliance</div><div class="panel-sub">Last 8 weeks</div></div>
+        <div class="comp-dots" id="d-comp-dots"></div>
+      </div>
+
+      <!-- Recent PRs -->
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">Personal Records</div><div class="panel-sub">All-time</div></div>
+        <div id="d-pr-rows"></div>
+      </div>
+
+      <!-- Strength chart -->
+      <div class="panel detail-full">
+        <div class="panel-hd"><div class="panel-title">Squat Progression</div><div class="panel-sub" style="color:var(--accent)">↑ +35 lbs · 12 weeks</div></div>
+        <div style="padding:8px 14px 14px">
+          <svg width="100%" height="80" viewBox="0 0 600 80" preserveAspectRatio="none" id="d-chart-svg"></svg>
+          <div style="display:flex;justify-content:space-between;padding-top:4px">
+            <span style="font-family:var(--ffm);font-size:9.5px;color:var(--text-d)">Oct</span>
+            <span style="font-family:var(--ffm);font-size:9.5px;color:var(--text-d)">Nov</span>
+            <span style="font-family:var(--ffm);font-size:9.5px;color:var(--text-d)">Dec</span>
+            <span style="font-family:var(--ffm);font-size:9.5px;color:var(--text-d)">Jan</span>
+            <span style="font-family:var(--ffm);font-size:9.5px;color:var(--text-d)">Feb</span>
+            <span style="font-family:var(--ffm);font-size:9.5px;color:var(--text-d)">Mar</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coach notes -->
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">Coach Notes</div><div class="panel-sub">3 notes</div></div>
+        <div style="padding:10px 14px;display:flex;flex-direction:column;gap:8px">
+          <div style="padding:9px 10px;background:var(--surface2);border-radius:var(--r);border:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--text);line-height:1.5;margin-bottom:4px">Knee tracking improved significantly. Ready to increase squat intensity to 87.5%.</div>
+            <div style="font-family:var(--ffm);font-size:9.5px;color:var(--text-d)">SC · 18 Mar</div>
+          </div>
+          <div style="padding:9px 10px;background:var(--surface2);border-radius:var(--r);border:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--text);line-height:1.5;margin-bottom:4px">Monitor shoulder in pressing. May sub incline DB for cable fly if discomfort persists.</div>
+            <div style="font-family:var(--ffm);font-size:9.5px;color:var(--text-d)">SC · 11 Mar</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobility -->
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">Mobility Scores</div><div class="panel-sub">Current</div></div>
+        <div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px" id="d-mob-rows"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: PROGRAM BUILDER ── -->
+  <div class="page" id="page-programs">
+    <div class="program-builder-frame">
+      <div class="coahos-layout">
+        <!-- sidebar -->
+        <div class="coahos-sidebar">
+          <div class="coahos-sh">Program Weeks</div>
+          <div class="coahos-sidebar-scroll" id="coahosSidebar"></div>
+          <div class="coahos-sf"><button class="add-wk-btn" onclick="coahosAddWeek()">+ Add Week</button></div>
+        </div>
+        <!-- main -->
+        <div class="coahos-main" id="coahosMain"></div>
+        <!-- right parsed -->
+        <div class="coahos-right">
+          <div class="coahos-rh"><span class="coahos-rt">Parsed Structure</span><div class="live-dot"></div></div>
+          <div class="coahos-rscroll" id="coahosRight"><div class="empty-state"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/></svg><p>Start typing to see<br/>live structure parsing</p></div></div>
+          <div class="coahos-stats"><div class="cos-stat"><div class="cos-num" id="cosEx">0</div><div class="cos-lbl">Exercises</div></div><div class="cos-stat"><div class="cos-num" id="cosSets">0</div><div class="cos-lbl">Sets</div></div><div class="cos-stat"><div class="cos-num" id="cosBlocks">0</div><div class="cos-lbl">Blocks</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .main -->
+</div><!-- end .shell -->
+
+<script>
+// ════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════
+const athletes = [
+  { id:1, initials:'MR', name:'Marcus R.', color:'#4fa3ff', program:'Block A · Hypertrophy', week:'W3D1', status:'active', compliance:84, lastSession:'Today', trend:[265,275,285,295,305,315], prs:2 },
+  { id:2, initials:'JT', name:'Jamie T.',  color:'#3dd9c1', program:'Block A · Hypertrophy', week:'W3D2', status:'active', compliance:91, lastSession:'Today', trend:[185,192,198,200,205,210], prs:3 },
+  { id:3, initials:'AK', name:'Alex K.',   color:'#ff9940', program:'Block A · Strength',   week:'W3D1', status:'behind', compliance:67, lastSession:'2d ago', trend:[225,228,225,230,228,232], prs:1 },
+  { id:4, initials:'DM', name:'Dana M.',   color:'#b78aff', program:'Block A · Hypertrophy', week:'W2D4', status:'active', compliance:88, lastSession:'Yesterday', trend:[135,140,145,148,152,155], prs:1 },
+  { id:5, initials:'CL', name:'Chris L.',  color:'#c8f53e', program:'Block B · Power',      week:'W1D2', status:'active', compliance:95, lastSession:'Today', trend:[295,305,315,325,335,345], prs:4 },
+  { id:6, initials:'PS', name:'Priya S.',  color:'#ff5e57', program:'Block A · Hypertrophy', week:'W3D3', status:'active', compliance:79, lastSession:'Today', trend:[95,100,105,108,112,115], prs:0 },
+  { id:7, initials:'SB', name:'Sam B.',    color:'#3dd9c1', program:'Deload · Recovery',    week:'W4D0', status:'deload', compliance:100,lastSession:'Yesterday',trend:[155,160,162,165,163,165], prs:1 },
+  { id:8, initials:'RL', name:'Ryan L.',   color:'#ff9940', program:'Block A · Strength',   week:'W2D2', status:'behind', compliance:58, lastSession:'5d ago', trend:[245,240,248,245,250,252], prs:0 },
+];
+
+// ════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════
+const pageTitles = {
+  'dashboard': ['Dashboard','Mon 22 Mar · Week 3'],
+  'roster': ['Roster','12 athletes · Block A'],
+  'programs': ['Program Builder','Block A / Hypertrophy Cycle'],
+  'athlete-detail': ['Athlete Detail',''],
+};
+
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  document.getElementById('nav-'+id)?.classList.add('active');
+  const [title, sub] = pageTitles[id] || [id, ''];
+  document.getElementById('topbar-title').textContent = title;
+  document.getElementById('topbar-sub').textContent = sub;
+
+  if (id === 'roster') renderRoster(athletes);
+  if (id === 'programs') coahosInit();
+  if (id === 'athlete-detail') renderAthleteDetail();
+}
+
+// ════════════════════════════════════════════
+// ROSTER
+// ════════════════════════════════════════════
+let rosterFilter = 'all', rosterSearch = '';
+
+function filterRoster(q) { rosterSearch = q.toLowerCase(); renderRoster(athletes); }
+function setFilter(f, btn) {
+  rosterFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  renderRoster(athletes);
+}
+
+function sparklinePath(data, w, h) {
+  const mn = Math.min(...data)*.96, mx = Math.max(...data)*1.02;
+  const xs = w/(data.length-1);
+  const pts = data.map((v,i)=>[i*xs, h-2-(v-mn)/(mx-mn)*(h-4)]);
+  let d = `M ${pts[0]}`;
+  for(let i=1;i<pts.length;i++){const[x0,y0]=pts[i-1],[x1,y1]=pts[i],cx=(x0+x1)/2; d+=` C ${cx},${y0} ${cx},${y1} ${x1},${y1}`;}
+  const lp=pts[pts.length-1];
+  return `<path d="${d}" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="${lp[0]}" cy="${lp[1]}" r="2" fill="var(--accent)"/>`;
+}
+
+function renderRoster(data) {
+  let filtered = data.filter(a => {
+    if (rosterFilter !== 'all' && a.status !== rosterFilter) return false;
+    if (rosterSearch && !a.name.toLowerCase().includes(rosterSearch)) return false;
+    return true;
+  });
+
+  const body = document.getElementById('rosterBody');
+  body.innerHTML = filtered.map(a => {
+    const statusPill = a.status === 'active' ? `<span class="pill pill-green">Active</span>`
+      : a.status === 'behind' ? `<span class="pill pill-orange">Behind</span>`
+      : a.status === 'deload' ? `<span class="pill pill-blue">Deload</span>`
+      : `<span class="pill pill-muted">—</span>`;
+    const compClass = a.compliance >= 85 ? '' : a.compliance >= 70 ? 'warn' : 'alert';
+    const spark = sparklinePath(a.trend, 80, 24);
+    return `<tr onclick="openAthleteDetail('${a.name}','${a.initials}','${a.color}')">
+      <td><div class="rt-athlete"><div class="rt-av" style="background:${a.color}22;color:${a.color}">${a.initials}</div><div><div class="rt-name">${a.name}</div><div class="rt-handle">${a.program}</div></div></div></td>
+      <td>${a.program.split('·')[0].trim()}</td>
+      <td><span class="pill pill-muted">${a.week}</span></td>
+      <td>${statusPill}</td>
+      <td class="progress-bar-cell"><div style="display:flex;align-items:center;gap:6px"><div class="mini-bar-track" style="flex:1"><div class="mini-bar-fill ${compClass}" style="width:${a.compliance}%"></div></div><span style="font-family:var(--ffm);font-size:10px;color:var(--text-m);width:28px;text-align:right">${a.compliance}%</span></div></td>
+      <td style="font-size:11.5px;color:var(--text-m)">${a.lastSession}</td>
+      <td class="spark-cell"><svg class="spark-svg" viewBox="0 0 80 24">${spark}</svg></td>
+      <td><span class="pill ${a.prs > 0 ? 'pill-gold' : 'pill-muted'}">${a.prs > 0 ? '★ '+a.prs : '—'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function openAthleteDetail(name, initials, color) {
+  document.getElementById('nav-athlete').style.display = 'flex';
+  document.getElementById('d-av').textContent = initials;
+  document.getElementById('d-av').style.background = color + '22';
+  document.getElementById('d-av').style.color = color;
+  document.getElementById('d-name').textContent = name;
+  pageTitles['athlete-detail'] = [name, 'Block A · Week 3'];
+  goPage('athlete-detail');
+}
+
+// ════════════════════════════════════════════
+// ATHLETE DETAIL
+// ════════════════════════════════════════════
+function renderAthleteDetail() {
+  // Compliance dots
+  const dots = document.getElementById('d-comp-dots');
+  const pattern = [true,true,true,false,true,true,true,true,false,true,true,true,true,false,true,true,true,true,true,false,true,true,true,false,true,false,true,true,'r','r','r','f','f','f','f'];
+  dots.innerHTML = pattern.map((v,i) => {
+    if (v === 'r') return `<div class="comp-dot cd-rest" title="Rest day">R</div>`;
+    if (v === 'f') return `<div class="comp-dot cd-future" title="Upcoming">–</div>`;
+    return `<div class="comp-dot ${v ? 'cd-done' : 'cd-miss'}" title="${v ? 'Completed' : 'Missed'}">${v ? '✓' : '✗'}</div>`;
+  }).join('');
+
+  // PR rows
+  const prs = document.getElementById('d-pr-rows');
+  const lifts = [
+    {n:'Back Squat',w:'315 lbs',ch:'+35',d:[250,265,280,295,310,315]},
+    {n:'Deadlift',w:'365 lbs',ch:'+40',d:[285,300,320,335,350,365]},
+    {n:'Bench Press',w:'205 lbs',ch:'+20',d:[165,175,185,195,200,205]},
+    {n:'Pull-Up',w:'+45 lbs',ch:'+15',d:[20,25,30,35,40,45]},
+    {n:'OHP',w:'120 lbs',ch:'+10',d:[95,100,105,110,115,120]},
+  ];
+  prs.innerHTML = lifts.map((l,i) => {
+    const spark = sparklinePath(l.d, 52, 20);
+    return `<div class="d-lift-row">
+      <div class="d-lift-name">${l.n}</div>
+      <div class="d-lift-wt">${l.w}</div>
+      <div class="d-lift-chg" style="color:var(--teal)">↑ ${l.ch}</div>
+      <svg class="d-lift-spark" viewBox="0 0 52 20">${spark}</svg>
+    </div>`;
+  }).join('');
+
+  // Mobility
+  const mobItems = [{l:'Hip Flexion',s:82},{l:'Shoulder',s:70},{l:'Ankle',s:55},{l:'T-Spine',s:78}];
+  document.getElementById('d-mob-rows').innerHTML = mobItems.map(m => `
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="font-size:12px;width:100px;flex-shrink:0">${m.l}</div>
+      <div style="flex:1;height:4px;background:var(--surface3);border-radius:2px;overflow:hidden"><div style="height:100%;border-radius:2px;background:${m.s>=75?'var(--teal)':m.s>=60?'var(--gold)':'var(--red)'};width:${m.s}%;transition:width 1s ease"></div></div>
+      <div style="font-family:var(--ffm);font-size:10px;color:var(--text-m);width:36px;text-align:right">${m.s}/100</div>
+    </div>`).join('');
+
+  // Squat chart
+  const svg = document.getElementById('d-chart-svg');
+  if (svg) {
+    const data = [250,260,270,280,290,300,305,308,310,312,313,315];
+    const W=600,h=80,px=8,py=8;
+    const mn=Math.min(...data)*.97, mx=Math.max(...data)*1.01;
+    const xs=(W-px*2)/(data.length-1);
+    const pts=data.map((v,i)=>[px+i*xs, py+(1-(v-mn)/(mx-mn))*(h-py*2)]);
+    let d=`M ${pts[0]}`;
+    for(let i=1;i<pts.length;i++){const[x0,y0]=pts[i-1],[x1,y1]=pts[i],cx=(x0+x1)/2; d+=` C ${cx},${y0} ${cx},${y1} ${x1},${y1}`;}
+    const last=pts[pts.length-1],first=pts[0];
+    svg.innerHTML = `
+      <path d="${d} L ${last[0]},${h-py} L ${first[0]},${h-py} Z" fill="rgba(200,245,62,.07)"/>
+      <path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" style="stroke-dasharray:2000;stroke-dashoffset:2000;transition:stroke-dashoffset 1.2s ease"/>
+      <circle cx="${last[0]}" cy="${last[1]}" r="4" fill="var(--accent)"/>`;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      const p=svg.querySelector('path:last-of-type');
+      if(p) p.style.strokeDashoffset='0';
+    }));
+  }
+}
+
+// ════════════════════════════════════════════
+// DASHBOARD EXTRAS
+// ════════════════════════════════════════════
+function renderDashboard() {
+  // Compliance rows
+  const cr = document.getElementById('dashComplianceRows');
+  if (cr) {
+    cr.innerHTML = athletes.slice(0,6).map(a => `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="width:24px;height:24px;border-radius:50%;background:${a.color}22;color:${a.color};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:var(--ffc);flex-shrink:0">${a.initials}</div>
+        <div style="font-size:12px;font-weight:500;width:72px;flex-shrink:0">${a.name.split(' ')[0]}</div>
+        <div style="flex:1;height:4px;background:var(--surface3);border-radius:2px;overflow:hidden"><div style="height:100%;border-radius:2px;background:${a.compliance>=85?'var(--accent)':a.compliance>=70?'var(--orange)':'var(--red)'};width:${a.compliance}%"></div></div>
+        <div style="font-family:var(--ffm);font-size:10px;color:var(--text-m);width:30px;text-align:right">${a.compliance}%</div>
+      </div>`).join('');
+  }
+
+  // Strength highlights
+  const sr = document.getElementById('dashStrengthRows');
+  if (sr) {
+    const highlights = [
+      {who:'Marcus R.',what:'Bench Press PR',val:'185 lbs',delta:'+5'},
+      {who:'Chris L.',what:'Deadlift PR',val:'345 lbs',delta:'+10'},
+      {who:'Jamie T.',what:'Squat PR',val:'210 lbs',delta:'+5'},
+      {who:'Dana M.',what:'OHP PR',val:'155 lbs',delta:'+5'},
+    ];
+    sr.innerHTML = highlights.map(h => `
+      <div style="padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)">
+        <span style="font-size:14px">★</span>
+        <div style="flex:1"><div style="font-size:12.5px;font-weight:600">${h.who}</div><div style="font-size:11px;color:var(--text-d)">${h.what}</div></div>
+        <div style="text-align:right"><div style="font-family:var(--ffm);font-size:13px;color:var(--text)">${h.val}</div><div style="font-size:11px;font-weight:600;color:var(--accent)">↑ ${h.delta}</div></div>
+      </div>`).join('');
+  }
+}
+
+// ════════════════════════════════════════════
+// COACH OS (PROGRAM BUILDER)
+// ════════════════════════════════════════════
+const coahosState = {
+  weeks: [
+    {id:1,label:'Accumulation',days:[{id:1,title:'Day 1',subtitle:'Upper Push',content:''},{id:2,title:'Day 2',subtitle:'Lower Pull',content:''},{id:3,title:'Day 3',subtitle:'Full Body',content:''},{id:4,title:'Day 4',subtitle:'Recovery',content:''}]},
+    {id:2,label:'Intensification',days:[{id:1,title:'Day 1',subtitle:'Upper Push',content:''},{id:2,title:'Day 2',subtitle:'Lower Pull',content:''},{id:3,title:'Day 3',subtitle:'Full Body',content:''}]},
+    {id:3,label:'Realization',days:[{id:1,title:'Day 1',subtitle:'Test Day A',content:''},{id:2,title:'Day 2',subtitle:'Test Day B',content:''}]},
+    {id:4,label:'Deload',days:[{id:1,title:'Day 1',subtitle:'Light Upper',content:''},{id:2,title:'Day 2',subtitle:'Light Lower',content:''}]},
+    {id:5,label:'Block B',days:[{id:1,title:'Day 1',subtitle:'Upper Push',content:''},{id:2,title:'Day 2',subtitle:'Lower Pull',content:''}]},
+    {id:6,label:'Peaking',days:[{id:1,title:'Day 1',subtitle:'Comp Prep',content:''}]},
+  ],
+  activeWeek:1, openDays: new Set(['1-1','1-2']),
+  parsedBlocks:{}, weekCount:6,
+};
+const CSAMPLE = {
+  1:`// PREP\nFoam Roll - Quads, Lats, T-Spine\nHip 90/90 x 5 reps per side\nBand Pull-Aparts 2x15\n\n// STRENGTH\nA1. Back Squat 4x5 @80%\nA2. Tempo RDL 4x8 3011 tempo\nB1. Front Foot Elevated Split Squat 3x10/leg\nB2. Hip Thrust 3x12 @70%\n\n// CONDITIONING\nEMOM 12min\n- Odd: 5 Power Cleans @135lbs\n- Even: 10 Box Jumps 24"`,
+  2:`// PREP\nThoracic Spine Rotations 2x8/side\nDead Bugs 2x10\n\n// STRENGTH\nA1. Deadlift 5x3 @85%\nA2. Weighted Pull-Up 5x5\nB1. Barbell Row 4x8 @70%\n\n// CONDITIONING\n3 Rounds, 2min rest\n- 400m Run\n- 15 KB Swings @53lbs\n- 10 Push-Ups`,
+};
+let cBidSeq=0,cEidSeq=0;
+let cDragEx=null,cOpenDd=null,cParseTm=null,cInitialized=false;
+
+function coahosInit() {
+  if (cInitialized) return;
+  cInitialized = true;
+  const w1=coahosState.weeks.find(w=>w.id===1);
+  if(w1){w1.days[0].content=CSAMPLE[1];w1.days[1].content=CSAMPLE[2];}
+  coahosSidebar();
+  coahosMain();
+}
+
+function coahosSidebar() {
+  document.getElementById('coahosSidebar').innerHTML = coahosState.weeks.map(w=>`
+    <button class="wk-item ${w.id===coahosState.activeWeek?'active':''}" onclick="coahosSetWeek(${w.id})">
+      <div class="wk-dot ${w.id===coahosState.activeWeek?'wk-dot-a':'wk-dot-m'}"></div>
+      <span class="wk-num">W${w.id}</span>
+      <span class="wk-label">${w.label}</span>
+    </button>`).join('');
+}
+
+function coahosMain() {
+  const wk=coahosState.weeks.find(w=>w.id===coahosState.activeWeek);
+  if(!wk)return;
+  document.getElementById('coahosMain').innerHTML=`
+    <div class="wk-title">Week ${wk.id}<span class="wk-title-tag">${wk.label.toUpperCase()}</span></div>
+    <div class="wk-meta"><span>${wk.days.length} training days</span><span>·</span><span>W${wk.id} of ${coahosState.weeks.length}</span></div>
+    ${wk.days.map(d=>coahosDayCard(d,wk.id)).join('')}
+    <button class="add-day-btn2" onclick="coahosAddDay(${wk.id})">+ Add Day</button>`;
+  wk.days.forEach(d=>{
+    const el=document.getElementById(`ced-${wk.id}-${d.id}`);
+    if(!el)return;
+    if(d.content)el.innerText=d.content;
+    el.addEventListener('input',()=>{d.content=el.innerText;clearTimeout(cParseTm);cParseTm=setTimeout(coahosRenderParsed,280);});
+    el.addEventListener('focus',()=>el.closest('.day-card').classList.add('focused'));
+    el.addEventListener('blur',()=>el.closest('.day-card').classList.remove('focused'));
+    coahosBindToolbar(wk.id,d.id);
+  });
+  coahosRenderParsed();
+}
+
+function coahosDayCard(day,weekId) {
+  const isOpen=coahosState.openDays.has(`${weekId}-${day.id}`);
+  const pills=coahosGuessPills(day.content);
+  return `<div class="day-card ${isOpen?'open':''}" id="cdaycard-${weekId}-${day.id}">
+    <div class="day-hd" onclick="coahosToggleDay(${weekId},${day.id})">
+      <div class="day-chev"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></div>
+      <div><div class="day-label">${day.title}</div><div class="day-sub">${day.subtitle}</div></div>
+      <div class="day-pills">${pills}</div>
+    </div>
+    <div class="day-body">
+      <div class="editor-toolbar" id="ctoolbar-${weekId}-${day.id}">
+        <button class="tb-btn2" data-cmd="bold"><b>B</b></button>
+        <button class="tb-btn2" data-cmd="italic"><i>I</i></button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn2" data-cmd="insertUnorderedList">≡</button>
+        <div class="tb-sep"></div>
+        <button class="ib-prep cinsert" data-blk="// PREP">PREP</button>
+        <button class="ib-str cinsert" data-blk="// STRENGTH">STR</button>
+        <button class="ib-cond cinsert" data-blk="// CONDITIONING">COND</button>
+      </div>
+      <div class="editor-area" id="ced-${weekId}-${day.id}" contenteditable="true"
+        data-ph="Type workout... Use // PREP, // STRENGTH, // CONDITIONING for blocks."></div>
+    </div>
+  </div>`;
+}
+
+function coahosGuessPills(c) {
+  if(!c||!c.trim())return `<span class="day-pill dp-rest">empty</span>`;
+  const t=c.toLowerCase(),p=[];
+  if(/\/\/\s*prep/i.test(t))p.push(`<span class="day-pill dp-prep">prep</span>`);
+  if(/\/\/\s*strength/i.test(t))p.push(`<span class="day-pill dp-str">str</span>`);
+  if(/\/\/\s*cond|emom|amrap/i.test(t))p.push(`<span class="day-pill dp-cond">cond</span>`);
+  return p.length?p.join(''):`<span class="day-pill dp-rest">mixed</span>`;
+}
+
+function coahosBindToolbar(wid,did) {
+  const tb=document.getElementById(`ctoolbar-${wid}-${did}`);
+  const ed=document.getElementById(`ced-${wid}-${did}`);
+  if(!tb||!ed)return;
+  tb.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('mousedown',e=>{e.preventDefault();document.execCommand(b.dataset.cmd,false,null);ed.focus();}));
+  tb.querySelectorAll('.cinsert').forEach(b=>b.addEventListener('mousedown',e=>{
+    e.preventDefault();ed.focus();
+    const sel=window.getSelection();
+    if(sel.rangeCount){const r=sel.getRangeAt(0);r.collapse(false);const n=document.createTextNode('\n'+b.dataset.blk+'\n');r.insertNode(n);r.setStartAfter(n);r.collapse(true);sel.removeAllRanges();sel.addRange(r);}
+    const wk=coahosState.weeks.find(w=>w.id===wid);
+    if(wk){const d=wk.days.find(d=>d.id===did);if(d)d.content=ed.innerText;}
+    clearTimeout(cParseTm);cParseTm=setTimeout(coahosRenderParsed,100);
+  }));
+}
+
+function coahosParseWorkout(text) {
+  if(!text||!text.trim())return[];
+  const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
+  const blocks=[];let cur=null;
+  const bkw={prep:/^\/\/\s*(prep|warm.?up|activation)/i,strength:/^\/\/\s*(strength|lift|main|primary)/i,conditioning:/^\/\/\s*(conditioning|cond|metcon|cardio)/i};
+  const trx={emom:/emom\s*(\d+)\s*min/i,amrap:/amrap\s*(\d+)\s*min/i,rounds:/(\d+)\s*rounds?/i};
+  const srRx=/(\d+)[x×](\d+(?:-\d+)?)/i,pctRx=/@(\d+)%/,tmpRx=/(\d{4})\s*tempo/i;
+  for(const line of lines){
+    let bt=null;for(const[t,r]of Object.entries(bkw)){if(r.test(line)){bt=t;break;}}
+    if(!bt&&/^\/\/\s*/i.test(line))bt='other';
+    if(bt){cur={id:++cBidSeq,name:line.replace(/^\/\/\s*/,'').trim(),type:bt,exercises:[],meta:[]};
+      Object.entries(trx).forEach(([t,r])=>{const m=line.match(r);if(m)cur.meta.push({label:t==='emom'?`EMOM ${m[1]}min`:t==='amrap'?`AMRAP ${m[1]}min`:`${m[1]} rounds`,type:t});});
+      blocks.push(cur);continue;}
+    if(!cur){cur={id:++cBidSeq,name:'General',type:'other',exercises:[],meta:[]};blocks.push(cur);}
+    if(Object.values(trx).some(r=>r.test(line))){Object.entries(trx).forEach(([t,r])=>{const m=line.match(r);if(m)cur.meta.push({label:t==='emom'?`EMOM ${m[1]}min`:t==='amrap'?`AMRAP ${m[1]}min`:`${m[1]} rounds`,type:t});});continue;}
+    const clean=line.replace(/^[-•–]\s*/,'').replace(/^(odd:|even:)/i,'').replace(/^[A-Z]\d?\.\s*/i,'').trim();
+    if(clean.length<2)continue;
+    let name=clean,detail='',dt='';
+    const em=clean.match(trx.emom),am=clean.match(trx.amrap);
+    if(em){detail=`EMOM ${em[1]}min`;dt='emom';}
+    else if(am){detail=`AMRAP ${am[1]}min`;dt='amrap';}
+    else{const sr=name.match(srRx);if(sr){detail+=`${sr[1]}×${sr[2]}`;name=name.replace(sr[0],'').trim();}
+      const pct=name.match(pctRx);if(pct){detail+=` @${pct[1]}%`;name=name.replace(pct[0],'').trim();}
+      const tmp=name.match(tmpRx);if(tmp){detail+=` ${tmp[1]}`;name=name.replace(tmp[0],'').trim();}}
+    name=name.replace(/\s{2,}/g,' ').replace(/\s*[-–@,]\s*$/,'').trim();
+    if(name.length>=2)cur.exercises.push({id:++cEidSeq,name,detail:detail.trim(),detailType:dt});
+  }
+  return blocks.filter(b=>b.exercises.length>0||b.meta.length>0);
+}
+
+function coahosRenderParsed() {
+  const wk=coahosState.weeks.find(w=>w.id===coahosState.activeWeek);
+  if(!wk)return;
+  let totalEx=0,totalSets=0,totalBlocks=0,html='';
+  wk.days.forEach(d=>{
+    const dk=`${coahosState.activeWeek}-${d.id}`;
+    const raw=(d.content||'').replace(/<[^>]*>/g,'\n');
+    let blocks=coahosParseWorkout(raw);
+    const saved=coahosState.parsedBlocks[dk];
+    if(saved&&saved.length)blocks=blocks.map((b,i)=>saved[i]?{...b,name:saved[i].name,id:saved[i].id}:b);
+    coahosState.parsedBlocks[dk]=blocks;
+    if(!blocks.length)return;
+    totalBlocks+=blocks.length;
+    html+=`<div class="parsed-day-sec"><div class="parsed-day-lbl">${d.title} · ${d.subtitle}</div>`;
+    blocks.forEach(block=>{
+      totalEx+=block.exercises.length;
+      block.exercises.forEach(ex=>{const m=ex.detail.match(/(\d+)×/);if(m)totalSets+=+m[1];});
+      const icon=block.type==='prep'?'◈':block.type==='strength'?'◆':block.type==='conditioning'?'◉':'◇';
+      html+=`<div class="parsed-block pb-${block.type}" id="cpb-${block.id}">
+        <div class="pb-head"><span class="pb-icon">${icon}</span>
+          <input class="pb-name-input" value="${coahosEsc(block.name)}" onchange="coahosRenameBlock('${dk}',${block.id},this.value)" onclick="event.stopPropagation()" title="Click to rename">
+          <span class="pb-count">${block.exercises.length} ex</span>
+          <button class="pb-del" onclick="coahosDeleteBlock('${dk}',${block.id})">✕</button>
+        </div>`;
+      if(block.meta.length)html+=`<div class="block-meta-row">${block.meta.map(m=>`<span class="meta-chip hl">${m.label}</span>`).join('')}</div>`;
+      block.exercises.forEach(ex=>{
+        html+=`<div class="ex-row" draggable="true" id="cex-${ex.id}" data-eid="${ex.id}" data-bid="${block.id}" data-dk="${dk}">
+          <span class="drag-hndl">⠿</span>
+          <div class="ex-nm">${coahosEsc(ex.name)}</div>
+          ${ex.detail?`<span class="ex-det ${ex.detailType||''}">${coahosEsc(ex.detail)}</span>`:''}
+          <button class="ex-mv-btn" onclick="coahosOpenMoveDD(event,'${dk}',${ex.id},${block.id})">⇄</button>
+        </div>`;
+      });
+      html+=`<div class="block-drop-zone" data-bid="${block.id}" data-dk="${dk}"></div></div>`;
+    });
+    html+='</div>';
+  });
+  if(!html)html=`<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/></svg><p>Start typing to see<br/>live structure parsing</p></div>`;
+  const panel=document.getElementById('coahosRight');
+  const prev=panel.scrollTop; panel.innerHTML=html; panel.scrollTop=prev;
+  document.getElementById('cosEx').textContent=totalEx;
+  document.getElementById('cosSets').textContent=totalSets||'–';
+  document.getElementById('cosBlocks').textContent=totalBlocks;
+  coahosBindDrag();
+}
+
+function coahosEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function coahosRenameBlock(dk,id,name){const blocks=coahosState.parsedBlocks[dk];if(blocks){const b=blocks.find(b=>b.id===id);if(b)b.name=name;}}
+function coahosDeleteBlock(dk,id){const blocks=coahosState.parsedBlocks[dk];if(blocks){const i=blocks.findIndex(b=>b.id===id);if(i!==-1){blocks.splice(i,1);coahosRenderParsed();}}}
+function coahosOpenMoveDD(e,dk,exId,fromId){
+  e.stopPropagation();coahosCloseDd();
+  const blocks=coahosState.parsedBlocks[dk]||[];
+  const others=blocks.filter(b=>b.id!==fromId);
+  if(!others.length)return;
+  const row=document.getElementById(`cex-${exId}`);if(!row)return;
+  const dd=document.createElement('div');dd.className='move-dd';dd.id='cOpenDd';
+  dd.innerHTML=`<div class="move-dd-hd">Move to block</div>`+others.map(b=>`<div class="move-dd-item" onclick="coahosMoveEx('${dk}',${exId},${fromId},${b.id})"><span class="mdd-dot" style="background:${b.type==='prep'?'var(--teal)':b.type==='strength'?'var(--blue)':'var(--orange)'}"></span>${coahosEsc(b.name)}</div>`).join('');
+  row.style.position='relative';row.appendChild(dd);cOpenDd=dd;
+  setTimeout(()=>document.addEventListener('click',coahosCloseDd,{once:true}),0);
+}
+function coahosCloseDd(){if(cOpenDd){cOpenDd.remove();cOpenDd=null;}}
+function coahosMoveEx(dk,exId,fromId,toId){
+  const blocks=coahosState.parsedBlocks[dk];if(!blocks)return;
+  const from=blocks.find(b=>b.id===fromId),to=blocks.find(b=>b.id===toId);if(!from||!to)return;
+  const idx=from.exercises.findIndex(e=>e.id===exId);if(idx===-1)return;
+  const[ex]=from.exercises.splice(idx,1);to.exercises.push(ex);coahosRenderParsed();
+}
+function coahosBindDrag(){
+  document.querySelectorAll('.ex-row').forEach(row=>{
+    row.addEventListener('dragstart',e=>{cDragEx={exId:+row.dataset.eid,dk:row.dataset.dk,fromBid:+row.dataset.bid};row.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+    row.addEventListener('dragend',()=>{row.classList.remove('dragging');document.querySelectorAll('.ex-row.drag-over,.block-drop-zone.dov').forEach(el=>el.classList.remove('drag-over','dov'));cDragEx=null;});
+    row.addEventListener('dragover',e=>{e.preventDefault();document.querySelectorAll('.ex-row.drag-over').forEach(r=>r.classList.remove('drag-over'));row.classList.add('drag-over');});
+    row.addEventListener('dragleave',()=>row.classList.remove('drag-over'));
+    row.addEventListener('drop',e=>{e.preventDefault();if(!cDragEx)return;const tid=+row.dataset.eid,tdk=row.dataset.dk,tbid=+row.dataset.bid;if(cDragEx.exId===tid)return;const fb=coahosState.parsedBlocks[cDragEx.dk]?.find(b=>b.id===cDragEx.fromBid),tb=coahosState.parsedBlocks[tdk]?.find(b=>b.id===tbid);if(!fb||!tb)return;const fi=fb.exercises.findIndex(ex=>ex.id===cDragEx.exId),ti=tb.exercises.findIndex(ex=>ex.id===tid);if(fi===-1||ti===-1)return;const[m]=fb.exercises.splice(fi,1);tb.exercises.splice(ti,0,m);coahosRenderParsed();});
+  });
+  document.querySelectorAll('.block-drop-zone').forEach(z=>{
+    z.addEventListener('dragover',e=>{e.preventDefault();document.querySelectorAll('.block-drop-zone.dov').forEach(dz=>dz.classList.remove('dov'));z.classList.add('dov');z.textContent='Drop here';});
+    z.addEventListener('dragleave',()=>{z.classList.remove('dov');z.textContent='';});
+    z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('dov');z.textContent='';if(!cDragEx)return;const tbid=+z.dataset.bid,tdk=z.dataset.dk;const fb=coahosState.parsedBlocks[cDragEx.dk]?.find(b=>b.id===cDragEx.fromBid),tb=coahosState.parsedBlocks[tdk]?.find(b=>b.id===tbid);if(!fb||!tb)return;const idx=fb.exercises.findIndex(ex=>ex.id===cDragEx.exId);if(idx===-1)return;const[m]=fb.exercises.splice(idx,1);tb.exercises.push(m);coahosRenderParsed();});
+  });
+}
+function coahosSetWeek(id){coahosState.activeWeek=id;coahosSidebar();coahosMain();}
+function coahosToggleDay(wid,did){const k=`${wid}-${did}`;coahosState.openDays.has(k)?coahosState.openDays.delete(k):coahosState.openDays.add(k);document.getElementById(`cdaycard-${wid}-${did}`)?.classList.toggle('open');}
+function coahosAddWeek(){const id=coahosState.weeks.length+1;coahosState.weeks.push({id,label:`Week ${id}`,days:[{id:1,title:'Day 1',subtitle:'Upper',content:''},{id:2,title:'Day 2',subtitle:'Lower',content:''}]});coahosState.activeWeek=id;coahosSidebar();coahosMain();}
+function coahosAddDay(wid){const wk=coahosState.weeks.find(w=>w.id===wid);if(!wk)return;const nid=wk.days.length+1;wk.days.push({id:nid,title:`Day ${nid}`,subtitle:'New Day',content:''});coahosMain();coahosState.openDays.add(`${wid}-${nid}`);}
+
+// ════════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════════
+renderDashboard();
+renderRoster(athletes);
+</script>
+</body>
+</html>

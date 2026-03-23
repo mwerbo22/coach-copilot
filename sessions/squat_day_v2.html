@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Squat Day</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&family=Barlow+Condensed:wght@400;500;600;700;800;900&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0c0c0d;
+  --s1:        #111113;
+  --s2:        #171719;
+  --s3:        #1d1d20;
+  --s4:        #242428;
+  --s5:        #2b2b30;
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.04);
+  --text:      #eeedf0;
+  --text2:     #7e7d88;
+  --text3:     #44434e;
+  --text4:     #242330;
+  /* accents */
+  --lime:      #c8f53e;
+  --lime-dk:   #9cbf22;
+  --lime-dim:  rgba(200,245,62,0.10);
+  --lime-glow: rgba(200,245,62,0.18);
+  --green:     #34d399;
+  --green-dim: rgba(52,211,153,0.09);
+  --orange:    #f97316;
+  --orng-dim:  rgba(249,115,22,0.09);
+  --blue:      #60a5fa;
+  --blue-dim:  rgba(96,165,250,0.09);
+  --rose:      #fb7185;
+  --gold:      #d4a84b;
+  --gold-dim:  rgba(212,168,75,0.10);
+  /* type */
+  --ff:  'Barlow', sans-serif;
+  --ffc: 'Barlow Condensed', sans-serif;
+  --ffm: 'DM Mono', monospace;
+  /* radius */
+  --r:   14px;
+  --rsm: 9px;
+  --rxs: 5px;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--ff);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+.app { display: flex; justify-content: center; height: 100%; }
+.phone {
+  width: 100%; max-width: 390px; height: 100%;
+  display: flex; flex-direction: column;
+  overflow: hidden; background: var(--bg);
+}
+
+/* ══════════════════════════════════════════
+   STATUS BAR
+══════════════════════════════════════════ */
+.status-bar {
+  height: 44px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 22px; flex-shrink: 0;
+}
+.st-time { font-size: 15px; font-weight: 600; letter-spacing: 0.01em; }
+.st-icons { display: flex; gap: 5px; align-items: center; }
+.st-icons svg { width: 15px; height: 15px; }
+
+/* ══════════════════════════════════════════
+   NAV
+══════════════════════════════════════════ */
+.top-nav {
+  padding: 2px 20px 12px;
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.nav-back {
+  width: 34px; height: 34px;
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.nav-back svg { width: 14px; height: 14px; stroke: var(--text2); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.nav-center { flex: 1; text-align: center; }
+.nav-eyebrow { font-family: var(--ffm); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 2px; }
+.nav-title { font-family: var(--ffc); font-size: 20px; font-weight: 800; letter-spacing: -0.01em; }
+.elapsed-badge {
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 12px;
+  display: flex; align-items: center; gap: 6px; cursor: pointer;
+}
+.eb-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--lime);
+  box-shadow: 0 0 5px var(--lime-glow);
+  animation: lpulse 1.8s ease-in-out infinite;
+}
+@keyframes lpulse { 0%,100%{opacity:1;box-shadow:0 0 5px var(--lime-glow)} 50%{opacity:.4;box-shadow:0 0 10px var(--lime)} }
+.eb-val { font-family: var(--ffc); font-size: 15px; font-weight: 700; letter-spacing: 0.02em; }
+
+/* ══════════════════════════════════════════
+   SESSION PROGRESS RAIL
+   Shows all blocks + position + "what's next"
+══════════════════════════════════════════ */
+.session-rail {
+  padding: 0 20px 14px; flex-shrink: 0;
+}
+.rail-track {
+  display: flex; gap: 6px; align-items: stretch; margin-bottom: 8px;
+}
+.rail-block {
+  flex: 1; display: flex; flex-direction: column; gap: 3px; cursor: pointer;
+}
+.rail-pip {
+  height: 3px; border-radius: 2px; transition: all 0.4s ease;
+}
+.rail-block.done  .rail-pip { background: var(--lime); }
+.rail-block.active .rail-pip { background: var(--text); box-shadow: 0 0 6px rgba(238,237,240,0.25); }
+.rail-block.next  .rail-pip { background: var(--s5); }
+.rail-block.later .rail-pip { background: var(--s3); }
+.rail-label {
+  font-family: var(--ffm); font-size: 8.5px; letter-spacing: 0.06em;
+  text-transform: uppercase; text-align: center; transition: color 0.3s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rail-block.done   .rail-label { color: var(--lime-dk); }
+.rail-block.active .rail-label { color: var(--text2); }
+.rail-block.next   .rail-label { color: var(--text3); }
+.rail-block.later  .rail-label { color: var(--text4); }
+
+/* "You are here / what's next" strip */
+.rail-context {
+  display: flex; align-items: center; gap: 6px;
+}
+.rc-here {
+  font-family: var(--ffm); font-size: 10px; letter-spacing: 0.05em; color: var(--text2);
+}
+.rc-here strong { color: var(--text); }
+.rc-arrow { color: var(--text3); font-size: 11px; }
+.rc-next  { font-family: var(--ffm); font-size: 10px; color: var(--text3); letter-spacing: 0.05em; }
+.rc-pct   {
+  margin-left: auto;
+  font-family: var(--ffm); font-size: 10px; color: var(--text3); letter-spacing: 0.04em;
+}
+.rc-pct span { color: var(--lime-dk); }
+
+/* ══════════════════════════════════════════
+   SCROLL AREA
+══════════════════════════════════════════ */
+.workout-scroll {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 0 14px 20px;
+}
+.workout-scroll::-webkit-scrollbar { display: none; }
+
+/* ══════════════════════════════════════════
+   BLOCK CARD — shared shell
+══════════════════════════════════════════ */
+.block-card {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 16px; margin-bottom: 10px; overflow: hidden; position: relative;
+  transition: border-color 0.25s;
+}
+.block-card.is-active  { border-color: rgba(255,255,255,0.10); }
+.block-card.is-done    { border-color: rgba(200,245,62,0.16); }
+.block-card.is-locked  { opacity: 0.55; }
+
+/* Accent stripe */
+.block-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+}
+.btype-prep::before      { background: linear-gradient(90deg, var(--green) 0%, transparent 65%); }
+.btype-interval::before  { background: linear-gradient(90deg, var(--orange) 0%, transparent 65%); }
+.btype-strength::before  { background: linear-gradient(90deg, var(--blue) 0%, transparent 65%); }
+.block-card.is-done::before { background: linear-gradient(90deg, var(--lime) 0%, transparent 65%); }
+
+/* ── Block header ── */
+.block-header {
+  padding: 14px 16px 0; display: flex; align-items: flex-start; gap: 12px;
+}
+.bh-left { display: flex; flex-direction: column; align-items: center; gap: 5px; flex-shrink: 0; padding-top: 2px; }
+.bh-seq {
+  font-family: var(--ffm); font-size: 9.5px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); line-height: 1;
+}
+.bh-pip { width: 2px; border-radius: 1px; flex-shrink: 0; }
+.pip-prep     { background: var(--green); }
+.pip-interval { background: var(--orange); }
+.pip-strength { background: var(--blue); }
+.block-card.is-done .bh-pip { background: var(--lime); }
+
+.bh-center { flex: 1; min-width: 0; padding-bottom: 12px; }
+
+/* Purpose tag — new: shows WHY this block exists */
+.bh-purpose {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--ffm); font-size: 9.5px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 4px; margin-bottom: 6px;
+}
+.purpose-prep     { background: var(--green-dim); color: var(--green);  border: 1px solid rgba(52,211,153,0.15); }
+.purpose-interval { background: var(--orng-dim);  color: var(--orange); border: 1px solid rgba(249,115,22,0.18); }
+.purpose-strength { background: var(--blue-dim);  color: var(--blue);   border: 1px solid rgba(96,165,250,0.18); }
+
+.bh-title {
+  font-family: var(--ffc); font-size: 18px; font-weight: 800;
+  letter-spacing: -0.01em; line-height: 1.1; color: var(--text); margin-bottom: 4px;
+}
+
+/* Structure line — coach instruction exactly as written */
+.bh-structure {
+  font-family: var(--ffm); font-size: 11px; color: var(--text3);
+  letter-spacing: 0.03em; line-height: 1.5;
+}
+.bh-structure strong { color: var(--text2); font-weight: 500; }
+
+.bh-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; padding-bottom: 12px; }
+
+/* Status ring */
+.bh-status-ring {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ffc); font-size: 11px; font-weight: 700; color: var(--text3);
+  transition: all 0.22s;
+}
+.block-card.is-done .bh-status-ring { background: var(--lime); border-color: var(--lime); color: var(--bg); }
+.bh-status-ring svg { width: 13px; height: 13px; stroke: var(--bg); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ══════════════════════════════════════════
+   BLOCK 1 — PREP (guided checklist)
+══════════════════════════════════════════ */
+
+/* Round progress header — active round display */
+.prep-round-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px 9px;
+  background: var(--s2); border-bottom: 1px solid var(--border2);
+}
+.prh-round-label {
+  font-family: var(--ffc); font-size: 13px; font-weight: 700;
+  letter-spacing: 0.02em; color: var(--text2); flex: 1;
+}
+.prh-round-label strong { color: var(--text); }
+.prh-round-dots { display: flex; gap: 5px; }
+.prd-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--s5); border: 1px solid var(--border);
+  transition: all 0.22s;
+}
+.prd-dot.done    { background: var(--green); border-color: var(--green); }
+.prd-dot.current { background: transparent; border-color: var(--green); box-shadow: 0 0 4px rgba(52,211,153,0.4); }
+
+/* Exercise rows */
+.prep-list { padding: 2px 0; }
+.prep-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border2);
+  cursor: pointer; transition: background 0.12s; position: relative;
+}
+.prep-item:last-child { border-bottom: none; }
+.prep-item:active { background: rgba(255,255,255,0.02); }
+
+.pi-check {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid var(--border); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.18s; background: transparent;
+}
+.prep-item.item-done .pi-check { background: var(--green); border-color: var(--green); }
+.pi-check svg { width: 10px; height: 10px; stroke: #0c0c0d; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0; transition: opacity 0.15s; }
+.prep-item.item-done .pi-check svg { opacity: 1; }
+
+.pi-body { flex: 1; min-width: 0; }
+.pi-name {
+  font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.25; margin-bottom: 1px;
+  transition: color 0.15s;
+}
+.prep-item.item-done .pi-name { color: var(--text3); text-decoration: line-through; text-decoration-color: var(--text4); }
+.pi-cue { font-size: 11px; color: var(--text3); font-style: italic; margin-top: 1px; }
+
+/* Per-item round pips */
+.pi-round-track { display: flex; gap: 3px; flex-shrink: 0; }
+.pi-rpip {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--s5); border: 1px solid var(--border);
+  transition: all 0.18s;
+}
+.pi-rpip.done { background: var(--green); border-color: var(--green); }
+.pi-rpip.cur  { border-color: var(--green); }
+
+/* Round complete / advance button */
+.round-advance-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 16px; border-top: 1px solid var(--border2);
+  background: var(--s2);
+}
+.rar-progress {
+  flex: 1;
+}
+.rar-text {
+  font-family: var(--ffm); font-size: 10px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 4px;
+}
+.rar-mini-bar { height: 2px; background: var(--s5); border-radius: 2px; overflow: hidden; }
+.rar-mini-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.4s ease; }
+.rar-btn {
+  font-family: var(--ffc); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 8px 16px; border-radius: var(--rsm); border: none; cursor: pointer;
+  background: var(--green); color: #0c0c0d; transition: all 0.15s; flex-shrink: 0;
+  display: flex; align-items: center; gap: 6px;
+}
+.rar-btn:disabled { background: var(--s5); color: var(--text3); cursor: not-allowed; }
+.rar-btn:not(:disabled):active { transform: scale(0.97); }
+.rar-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.rar-btn.all-done { background: var(--lime); color: #0c0c0d; }
+
+/* ══════════════════════════════════════════
+   "WHAT'S NEXT" BRIDGE — between blocks
+══════════════════════════════════════════ */
+.next-bridge {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px; margin: -4px 0 10px;
+}
+.nb-line { flex: 1; height: 1px; background: var(--border2); }
+.nb-pill {
+  font-family: var(--ffm); font-size: 9.5px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text3);
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 20px; padding: 3px 10px;
+  display: flex; align-items: center; gap: 5px; flex-shrink: 0;
+}
+.nb-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+/* ══════════════════════════════════════════
+   BLOCK 2 — INTERVAL
+══════════════════════════════════════════ */
+/* Format display */
+.ivl-format-row {
+  display: flex; align-items: center; gap: 0;
+  padding: 14px 16px 12px; border-bottom: 1px solid var(--border2);
+  position: relative;
+}
+.ivl-half { flex: 1; text-align: center; }
+.ivl-big {
+  font-family: var(--ffc); font-size: 38px; font-weight: 900;
+  letter-spacing: -0.02em; line-height: 1;
+}
+.ivl-big.work { color: var(--orange); }
+.ivl-big.rest { color: var(--blue); }
+.ivl-unit { font-family: var(--ffm); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 3px; }
+.ivl-unit.work { color: rgba(249,115,22,0.4); }
+.ivl-unit.rest { color: rgba(96,165,250,0.4); }
+.ivl-sep { width: 1px; height: 52px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
+
+/* Live timer */
+.ivl-timer {
+  padding: 14px 16px 10px; text-align: center; border-bottom: 1px solid var(--border2);
+}
+.ivl-phase {
+  font-family: var(--ffm); font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; margin-bottom: 8px; transition: color 0.3s;
+}
+.ivl-phase.work { color: var(--orange); }
+.ivl-phase.rest { color: var(--blue); }
+.ivl-phase.idle { color: var(--text3); }
+.ivl-clock {
+  font-family: var(--ffc); font-size: 58px; font-weight: 900;
+  letter-spacing: -0.03em; line-height: 1; color: var(--text); margin-bottom: 6px; transition: color 0.3s;
+}
+.ivl-clock.work    { color: var(--orange); }
+.ivl-clock.rest    { color: var(--blue); }
+.ivl-clock.warning { color: var(--rose); }
+.ivl-rnd-info { font-family: var(--ffm); font-size: 10px; color: var(--text3); letter-spacing: 0.05em; margin-bottom: 10px; }
+.ivl-bar-track { height: 2px; background: var(--s4); border-radius: 2px; overflow: hidden; }
+.ivl-bar-fill { height: 100%; border-radius: 2px; transition: width 1s linear, background 0.3s; }
+.ivl-bar-fill.work { background: var(--orange); }
+.ivl-bar-fill.rest { background: var(--blue); }
+
+/* Controls */
+.ivl-controls { display: flex; gap: 7px; padding: 12px 16px; border-bottom: 1px solid var(--border2); }
+.ivl-btn {
+  flex: 1; height: 40px; border-radius: var(--rsm);
+  font-family: var(--ffc); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all 0.15s; user-select: none;
+}
+.ivl-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+.ivl-start  { background: var(--orange); color: #0c0c0d; }
+.ivl-start:active  { transform: scale(0.97); }
+.ivl-pause  { background: var(--s3); color: var(--text2); border: 1px solid var(--border); }
+.ivl-reset  { background: var(--s3); color: var(--text2); border: 1px solid var(--border); flex: 0 0 40px; }
+
+/* Exercise rows */
+.ivl-exercises { padding: 2px 0; }
+.ivl-ex {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-bottom: 1px solid var(--border2);
+}
+.ivl-ex:last-child { border-bottom: none; }
+.ivl-ex-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--orange); opacity: 0.5; flex-shrink: 0; }
+.ivl-ex-name { flex: 1; font-size: 13.5px; font-weight: 500; color: var(--text); line-height: 1.3; }
+.ivl-ex-detail { font-family: var(--ffm); font-size: 11px; color: var(--text3); flex-shrink: 0; }
+
+/* Round tracker */
+.ivl-rounds { display: flex; align-items: center; gap: 8px; padding: 11px 16px; border-top: 1px solid var(--border2); }
+.ivl-rnd-lbl { font-family: var(--ffm); font-size: 10px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--text3); flex: 1; }
+.ivl-rnd-bubs { display: flex; gap: 6px; }
+.ivl-rbub {
+  width: 30px; height: 30px; border-radius: 7px; border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ffc); font-size: 12px; font-weight: 700; color: var(--text3);
+  cursor: pointer; transition: all 0.15s; user-select: none;
+}
+.ivl-rbub.done    { background: var(--orng-dim); border-color: rgba(249,115,22,0.3); color: var(--orange); }
+.ivl-rbub.current { border-color: var(--orange); color: var(--orange); }
+
+/* ══════════════════════════════════════════
+   BLOCK 3 — STRENGTH
+══════════════════════════════════════════ */
+.str-coach-note {
+  padding: 11px 16px; border-bottom: 1px solid var(--border2);
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.scn-tag {
+  font-family: var(--ffm); font-size: 9px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 1px;
+  background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(96,165,250,0.18);
+}
+.scn-text { font-size: 13px; color: var(--text2); line-height: 1.45; font-style: italic; }
+
+.str-lift-hd {
+  padding: 14px 16px 12px; border-bottom: 1px solid var(--border2);
+}
+.slh-name {
+  font-family: var(--ffc); font-size: 26px; font-weight: 900;
+  letter-spacing: -0.02em; line-height: 1; color: var(--text); margin-bottom: 7px;
+}
+.slh-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.slh-tag {
+  font-family: var(--ffc); font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px; letter-spacing: 0.05em; text-transform: uppercase;
+}
+.t-reps { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
+.t-pct  { background: var(--s4); color: var(--text2); border: 1px solid var(--border); }
+.t-note { font-family: var(--ff); font-size: 11.5px; color: var(--text3); font-style: italic; font-weight: 400; }
+
+/* History strip */
+.str-history { display: flex; gap: 0; border-bottom: 1px solid var(--border2); }
+.sh-cell {
+  flex: 1; padding: 10px 14px; text-align: center; border-right: 1px solid var(--border2);
+}
+.sh-cell:last-child { border-right: none; }
+.sh-lbl { font-family: var(--ffm); font-size: 9px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+.sh-val { font-family: var(--ffc); font-size: 16px; font-weight: 800; color: var(--text); letter-spacing: 0.01em; line-height: 1; }
+.sh-sub { font-family: var(--ffm); font-size: 10px; color: var(--text3); margin-top: 2px; }
+.sh-sub.pr { color: var(--lime-dk); }
+
+/* Logger */
+.str-logger { padding: 14px 16px 12px; border-bottom: 1px solid var(--border2); }
+.sl-lbl { font-family: var(--ffm); font-size: 10px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+.sl-inputs { display: flex; gap: 10px; margin-bottom: 8px; }
+.sl-field { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.sl-fl { font-family: var(--ffm); font-size: 9px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--text3); }
+.sl-inp {
+  width: 100%; background: var(--s3); border: 1.5px solid var(--border);
+  border-radius: var(--rsm); padding: 10px 12px;
+  font-family: var(--ffc); font-size: 28px; font-weight: 800;
+  color: var(--text); text-align: center; outline: none;
+  caret-color: var(--blue); letter-spacing: 0.02em; transition: border-color 0.15s;
+  -moz-appearance: textfield;
+}
+.sl-inp::-webkit-outer-spin-button, .sl-inp::-webkit-inner-spin-button { -webkit-appearance: none; }
+.sl-inp:focus { border-color: var(--blue); }
+.sl-u { font-family: var(--ffm); font-size: 10px; color: var(--text3); text-align: center; margin-top: 2px; letter-spacing: 0.05em; }
+.sl-vdiv { width: 1px; background: var(--border); margin-top: 14px; flex-shrink: 0; }
+.sl-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.sl-stp {
+  height: 34px; background: var(--s3); border: 1px solid var(--border); border-radius: var(--rsm);
+  font-family: var(--ffc); font-size: 12px; font-weight: 700; color: var(--text2);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s; user-select: none;
+}
+.sl-stp:active { background: var(--s4); color: var(--text); }
+.sl-stp.wide { grid-column: span 2; font-size: 11px; }
+
+/* Logged sets */
+.str-sets { padding: 4px 0 6px; }
+.ss-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 16px; border-bottom: 1px solid var(--border2);
+}
+.ss-row:last-child { border-bottom: none; }
+.ss-num { font-family: var(--ffm); font-size: 11px; color: var(--text3); width: 52px; letter-spacing: 0.04em; flex-shrink: 0; }
+.ss-wt { flex: 1; font-family: var(--ffc); font-size: 16px; font-weight: 700; color: var(--text); }
+.ss-reps { font-family: var(--ffm); font-size: 12px; color: var(--blue); flex-shrink: 0; }
+.ss-rm { width: 26px; height: 26px; background: transparent; border: none; cursor: pointer; color: var(--text3); font-size: 13px; opacity: 0.5; transition: opacity 0.12s; flex-shrink: 0; }
+.ss-rm:hover { opacity: 1; }
+
+.add-set-btn {
+  width: calc(100% - 32px); margin: 8px 16px; height: 36px;
+  background: transparent; border: 1px dashed var(--border);
+  border-radius: var(--rsm); font-family: var(--ff); font-size: 12px; font-weight: 600;
+  color: var(--text3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.14s;
+}
+.add-set-btn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-dim); }
+
+/* ══════════════════════════════════════════
+   CTA FOOTER
+══════════════════════════════════════════ */
+.cta-footer {
+  padding: 10px 18px 20px;
+  background: linear-gradient(to top, var(--bg) 55%, transparent);
+  display: flex; flex-direction: column; gap: 7px; flex-shrink: 0;
+}
+
+/* Mini "up next" hint above CTA */
+.cta-next-hint {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-family: var(--ffm); font-size: 10px; letter-spacing: 0.06em;
+  color: var(--text3); padding: 2px 0;
+}
+.cnh-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+.cnh-arrow { color: var(--text4); }
+.cnh-next { color: var(--text3); }
+
+.cta-btn {
+  width: 100%; height: 54px; border-radius: 14px;
+  font-family: var(--ffc); font-size: 17px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.18s; position: relative; overflow: hidden;
+}
+.cta-btn::after { content:''; position:absolute;inset:0;background:rgba(0,0,0,0);transition:background .15s; }
+.cta-btn:active::after { background: rgba(0,0,0,0.12); }
+.cta-btn svg, .cta-btn span { position: relative; z-index: 1; }
+.cta-btn svg { width: 16px; height: 16px; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+.cta-prep     { background: var(--green);  color: #0c0c0d; box-shadow: 0 4px 20px rgba(52,211,153,0.18); }
+.cta-interval { background: var(--orange); color: #0c0c0d; box-shadow: 0 4px 20px rgba(249,115,22,0.18); }
+.cta-strength { background: var(--lime);   color: #0c0c0d; box-shadow: 0 4px 20px rgba(200,245,62,0.18); }
+.cta-neutral  { background: var(--s2);     color: var(--text2); border: 1px solid var(--border); box-shadow: none; }
+
+.cta-skip {
+  background: transparent; border: none;
+  font-family: var(--ff); font-size: 12px; font-weight: 600;
+  color: var(--text3); cursor: pointer; text-align: center; padding: 2px;
+  letter-spacing: 0.03em; transition: color 0.14s;
+}
+.cta-skip:hover { color: var(--text2); }
+
+/* ══════════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.block-card { animation: fadeUp 0.3s ease both; }
+.block-card:nth-child(1) { animation-delay: 0.05s; }
+.block-card:nth-child(3) { animation-delay: 0.12s; }
+.block-card:nth-child(5) { animation-delay: 0.19s; }
+
+@keyframes popCheck {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+.pi-check.popping { animation: popCheck 0.25s ease; }
+</style>
+</head>
+<body>
+<div class="app">
+<div class="phone">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span class="st-time">9:41</span>
+    <div class="st-icons">
+      <svg viewBox="0 0 20 14" fill="var(--text)"><rect x="0" y="4" width="3" height="10" rx="1" opacity=".3"/><rect x="4.5" y="2.5" width="3" height="11.5" rx="1" opacity=".55"/><rect x="9" y="0" width="3" height="14" rx="1" opacity=".8"/><rect x="13.5" y="0" width="3" height="14" rx="1"/></svg>
+      <svg viewBox="0 0 25 12"><rect x=".5" y=".5" width="21" height="11" rx="3" stroke="var(--text)" stroke-opacity=".3" fill="none"/><rect x="2" y="2" width="16" height="8" rx="1.5" fill="var(--text)"/><path d="M23 4v4" stroke="var(--text)" stroke-opacity=".3" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <div class="top-nav">
+    <div class="nav-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <div class="nav-center">
+      <div class="nav-eyebrow">Week 3 · Day 2</div>
+      <div class="nav-title">Squat Day</div>
+    </div>
+    <div class="elapsed-badge" id="elapsedBadge">
+      <div class="eb-dot"></div>
+      <div class="eb-val" id="elapsedVal">0:00</div>
+    </div>
+  </div>
+
+  <!-- SESSION RAIL — full workout map -->
+  <div class="session-rail">
+    <div class="rail-track">
+      <div class="rail-block active" id="rail0" onclick="scrollToBlock(0)">
+        <div class="rail-pip"></div>
+        <div class="rail-label">Prep</div>
+      </div>
+      <div class="rail-block next" id="rail1" onclick="scrollToBlock(1)">
+        <div class="rail-pip"></div>
+        <div class="rail-label">Activation</div>
+      </div>
+      <div class="rail-block later" id="rail2" onclick="scrollToBlock(2)">
+        <div class="rail-pip"></div>
+        <div class="rail-label">Strength</div>
+      </div>
+    </div>
+    <div class="rail-context">
+      <span class="rc-here">Now: <strong id="rcHere">Hip Prep</strong></span>
+      <span class="rc-arrow">→</span>
+      <span class="rc-next" id="rcNext">Glute Activation</span>
+      <span class="rc-pct"><span id="rcPct">0</span>% done</span>
+    </div>
+  </div>
+
+  <!-- SCROLL CONTENT -->
+  <div class="workout-scroll" id="workoutScroll">
+
+    <!-- ════════════════════════════════════
+         BLOCK 1: PREP — Hip Mobility
+    ════════════════════════════════════ -->
+    <div class="block-card btype-prep is-active" id="block0">
+      <div class="block-header">
+        <div class="bh-left">
+          <span class="bh-seq">01</span>
+          <div class="bh-pip pip-prep" style="height:28px"></div>
+        </div>
+        <div class="bh-center">
+          <div class="bh-purpose purpose-prep">Hip Mobility</div>
+          <div class="bh-title">Prep &amp; Mobility</div>
+          <div class="bh-structure"><strong>2 rounds</strong> · Complete all 3 exercises each round</div>
+        </div>
+        <div class="bh-right">
+          <div class="bh-status-ring" id="b0ring">0/2</div>
+        </div>
+      </div>
+
+      <!-- Round header — shows current round in context -->
+      <div class="prep-round-header">
+        <div class="prh-round-label">Round <strong id="prepRoundLbl">1</strong> of 2</div>
+        <div class="prh-round-dots">
+          <div class="prd-dot current" id="prd0"></div>
+          <div class="prd-dot" id="prd1"></div>
+        </div>
+      </div>
+
+      <!-- Exercises -->
+      <div class="prep-list">
+        <div class="prep-item" id="pi0" onclick="tapPrepItem(0)">
+          <div class="pi-check" id="pic0"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="pi-body">
+            <div class="pi-name">Prone Internal Rotation</div>
+            <div class="pi-cue">Lie flat, rotate hip internally — feel the glute medius</div>
+          </div>
+          <div class="pi-round-track">
+            <div class="pi-rpip" id="pi0-r0"></div>
+            <div class="pi-rpip cur" id="pi0-r1"></div>
+          </div>
+        </div>
+        <div class="prep-item" id="pi1" onclick="tapPrepItem(1)">
+          <div class="pi-check" id="pic1"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="pi-body">
+            <div class="pi-name">Banded Hamstring Stretch</div>
+            <div class="pi-cue">Keep pelvis neutral, dorsiflect the ankle</div>
+          </div>
+          <div class="pi-round-track">
+            <div class="pi-rpip" id="pi1-r0"></div>
+            <div class="pi-rpip cur" id="pi1-r1"></div>
+          </div>
+        </div>
+        <div class="prep-item" id="pi2" onclick="tapPrepItem(2)">
+          <div class="pi-check" id="pic2"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="pi-body">
+            <div class="pi-name">½ Kneeling Hip Circle</div>
+            <div class="pi-cue">Slow and controlled — full range of motion</div>
+          </div>
+          <div class="pi-round-track">
+            <div class="pi-rpip" id="pi2-r0"></div>
+            <div class="pi-rpip cur" id="pi2-r1"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Round advance -->
+      <div class="round-advance-row">
+        <div class="rar-progress">
+          <div class="rar-text" id="rarText">Check off all 3 exercises to complete the round</div>
+          <div class="rar-mini-bar"><div class="rar-mini-fill" id="rarFill" style="width:0%"></div></div>
+        </div>
+        <button class="rar-btn" id="rarBtn" disabled onclick="advancePrepRound()">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Round Done
+        </button>
+      </div>
+    </div>
+
+    <!-- "WHAT'S NEXT" BRIDGE -->
+    <div class="next-bridge">
+      <div class="nb-line"></div>
+      <div class="nb-pill">
+        <div class="nb-dot" style="background:var(--orange)"></div>
+        Up next: Glute Activation
+      </div>
+      <div class="nb-line"></div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         BLOCK 2: INTERVAL — Glute Activation
+    ════════════════════════════════════ -->
+    <div class="block-card btype-interval" id="block1">
+      <div class="block-header">
+        <div class="bh-left">
+          <span class="bh-seq">02</span>
+          <div class="bh-pip pip-interval" style="height:28px"></div>
+        </div>
+        <div class="bh-center">
+          <div class="bh-purpose purpose-interval">Glute Activation</div>
+          <div class="bh-title">Hip Drive Circuit</div>
+          <div class="bh-structure"><strong>30s on / 15s rest</strong> × 3 rounds</div>
+        </div>
+        <div class="bh-right">
+          <div class="bh-status-ring" id="b1ring">0/3</div>
+        </div>
+      </div>
+
+      <!-- Format numbers -->
+      <div class="ivl-format-row">
+        <div class="ivl-half">
+          <div class="ivl-big work">30</div>
+          <div class="ivl-unit work">sec work</div>
+        </div>
+        <div class="ivl-sep"></div>
+        <div class="ivl-half">
+          <div class="ivl-big rest">15</div>
+          <div class="ivl-unit rest">sec rest</div>
+        </div>
+      </div>
+
+      <!-- Live timer -->
+      <div class="ivl-timer">
+        <div class="ivl-phase idle" id="ivlPhase">Ready</div>
+        <div class="ivl-clock" id="ivlClock">0:30</div>
+        <div class="ivl-rnd-info" id="ivlRndInfo">Round 1 of 3 · 3 exercises</div>
+        <div class="ivl-bar-track"><div class="ivl-bar-fill work" id="ivlBar" style="width:100%"></div></div>
+      </div>
+
+      <!-- Controls -->
+      <div class="ivl-controls">
+        <button class="ivl-btn ivl-start" id="ivlStartBtn" onclick="ivlToggle()">
+          <svg viewBox="0 0 24 24" style="fill:#0c0c0d"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Start
+        </button>
+        <button class="ivl-btn ivl-reset" onclick="ivlReset()" title="Reset">
+          <svg viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-6"/></svg>
+        </button>
+      </div>
+
+      <!-- Exercise list -->
+      <div class="ivl-exercises">
+        <div class="ivl-ex"><div class="ivl-ex-dot"></div><div class="ivl-ex-name">Single Leg Bridge <span style="color:var(--text3);font-size:11.5px">(Left)</span></div><div class="ivl-ex-detail">30 sec</div></div>
+        <div class="ivl-ex"><div class="ivl-ex-dot"></div><div class="ivl-ex-name">Single Leg Bridge <span style="color:var(--text3);font-size:11.5px">(Right)</span></div><div class="ivl-ex-detail">30 sec</div></div>
+        <div class="ivl-ex"><div class="ivl-ex-dot"></div><div class="ivl-ex-name">Hamstring Curls</div><div class="ivl-ex-detail">30 sec</div></div>
+      </div>
+
+      <!-- Round tracker -->
+      <div class="ivl-rounds">
+        <div class="ivl-rnd-lbl">Rounds completed</div>
+        <div class="ivl-rnd-bubs">
+          <div class="ivl-rbub current" id="irb0" onclick="markIvlRound(0)">1</div>
+          <div class="ivl-rbub" id="irb1" onclick="markIvlRound(1)">2</div>
+          <div class="ivl-rbub" id="irb2" onclick="markIvlRound(2)">3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- "WHAT'S NEXT" BRIDGE -->
+    <div class="next-bridge">
+      <div class="nb-line"></div>
+      <div class="nb-pill">
+        <div class="nb-dot" style="background:var(--blue)"></div>
+        Up next: Back Squat
+      </div>
+      <div class="nb-line"></div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         BLOCK 3: STRENGTH — Back Squat
+    ════════════════════════════════════ -->
+    <div class="block-card btype-strength" id="block2">
+      <div class="block-header">
+        <div class="bh-left">
+          <span class="bh-seq">03</span>
+          <div class="bh-pip pip-strength" style="height:28px"></div>
+        </div>
+        <div class="bh-center">
+          <div class="bh-purpose purpose-strength">Max Effort Squat</div>
+          <div class="bh-title">Strength</div>
+          <div class="bh-structure"><strong>5–8 min build</strong> · Heavy set at 85%</div>
+        </div>
+        <div class="bh-right">
+          <div class="bh-status-ring" id="b2ring">—</div>
+        </div>
+      </div>
+
+      <!-- Coach note -->
+      <div class="str-coach-note">
+        <div class="scn-tag">Coach</div>
+        <div class="scn-text">Take 5–8 minutes to progressively build up. Prioritise depth and bar path — don't rush to the heavy set.</div>
+      </div>
+
+      <!-- Lift ID -->
+      <div class="str-lift-hd">
+        <div class="slh-name">Back Squat</div>
+        <div class="slh-tags">
+          <span class="slh-tag t-reps">1–3 reps</span>
+          <span class="slh-tag t-pct">85% target</span>
+          <span class="t-note">Build progressively</span>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="str-history">
+        <div class="sh-cell">
+          <div class="sh-lbl">Last</div>
+          <div class="sh-val">185<span style="font-size:11px;color:var(--text3)">lb</span></div>
+          <div class="sh-sub">×3</div>
+        </div>
+        <div class="sh-cell">
+          <div class="sh-lbl">3-Wk Best</div>
+          <div class="sh-val">215<span style="font-size:11px;color:var(--text3)">lb</span></div>
+          <div class="sh-sub">×1</div>
+        </div>
+        <div class="sh-cell">
+          <div class="sh-lbl">All-Time</div>
+          <div class="sh-val">225<span style="font-size:11px;color:var(--text3)">lb</span></div>
+          <div class="sh-sub pr">PR ↑</div>
+        </div>
+      </div>
+
+      <!-- Logger -->
+      <div class="str-logger">
+        <div class="sl-lbl">Log this set</div>
+        <div class="sl-inputs">
+          <div class="sl-field">
+            <div class="sl-fl">Weight</div>
+            <input type="number" class="sl-inp" id="wIn" value="135" inputmode="numeric" step="5">
+            <div class="sl-u">lbs</div>
+          </div>
+          <div class="sl-vdiv"></div>
+          <div class="sl-field">
+            <div class="sl-fl">Reps</div>
+            <input type="number" class="sl-inp" id="rIn" value="5" inputmode="numeric" min="1" max="20">
+            <div class="sl-u">reps</div>
+          </div>
+        </div>
+        <div class="sl-steps" style="margin-bottom:5px">
+          <button class="sl-stp" onclick="adj('wIn',-10)">−10 lb</button>
+          <button class="sl-stp" onclick="adj('wIn',+10)">+10 lb</button>
+          <button class="sl-stp" onclick="adj('wIn',-5)">−5</button>
+          <button class="sl-stp" onclick="adj('wIn',+5)">+5</button>
+        </div>
+        <div class="sl-steps">
+          <button class="sl-stp wide" onclick="adj('rIn',-1)">−1 rep</button>
+          <button class="sl-stp wide" onclick="adj('rIn',+1)">+1 rep</button>
+        </div>
+      </div>
+
+      <!-- Logged sets -->
+      <div class="str-sets" id="strSets"></div>
+      <button class="add-set-btn" onclick="logStrSet()">
+        <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Log this set
+      </button>
+    </div>
+
+    <div style="height:10px"></div>
+  </div>
+
+  <!-- CTA FOOTER -->
+  <div class="cta-footer">
+    <div class="cta-next-hint" id="ctaHint">
+      <div class="cnh-dot" id="cnh-dot" style="background:var(--green)"></div>
+      <span id="cnh-label">Hip Prep · Round 1 of 2</span>
+      <span class="cnh-arrow">→</span>
+      <span class="cnh-next" id="cnh-next">Glute Activation</span>
+    </div>
+    <button class="cta-btn cta-prep" id="ctaBtn" onclick="ctaAction()">
+      <svg viewBox="0 0 24 24" id="ctaIcon" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+      <span id="ctaLabel">Mark Round 1 Done</span>
+    </button>
+    <button class="cta-skip" onclick="skipBlock()">Skip this block</button>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  WORKOUT DATA MODEL
+// ══════════════════════════════════════════
+const BLOCKS = [
+  { id: 0, type: 'prep',      label: 'Hip Prep',          nextLabel: 'Glute Activation' },
+  { id: 1, type: 'interval',  label: 'Glute Activation',  nextLabel: 'Back Squat' },
+  { id: 2, type: 'strength',  label: 'Back Squat',         nextLabel: null },
+];
+
+const PREP_TOTAL_ROUNDS = 2;
+const IVL_TOTAL_ROUNDS  = 3;
+const IVL_WORK = 30, IVL_REST = 15;
+
+// ── Prep state ───────────────────────────
+const prep = {
+  round:       1,                  // 1 or 2
+  itemsDone:   [false,false,false], // per exercise this round
+  roundsDone:  0,
+};
+
+// ── Interval state ───────────────────────
+const ivl = {
+  running:   false,
+  phase:     'work',   // 'work' | 'rest'
+  sec:       IVL_WORK,
+  rounds:    0,
+  timerRef:  null,
+};
+
+// ── Strength state ───────────────────────
+const str = {
+  sets: [],  // [{weight, reps}]
+};
+
+// ── Elapsed ──────────────────────────────
+let elapsedSec = 0, elapsedRunning = true, elapsedRef = null;
+
+// ══════════════════════════════════════════
+//  ELAPSED TIMER
+// ══════════════════════════════════════════
+function tickElapsed() {
+  if (!elapsedRunning) return;
+  elapsedSec++;
+  const m = Math.floor(elapsedSec/60), s = elapsedSec%60;
+  document.getElementById('elapsedVal').textContent =
+    m + ':' + String(s).padStart(2,'0');
+}
+elapsedRef = setInterval(tickElapsed, 1000);
+
+document.getElementById('elapsedBadge').addEventListener('click', () => {
+  elapsedRunning = !elapsedRunning;
+  document.querySelector('.eb-dot').style.animationPlayState = elapsedRunning ? 'running' : 'paused';
+});
+
+// ══════════════════════════════════════════
+//  SESSION RAIL
+// ══════════════════════════════════════════
+function blockProgress(id) {
+  if (id === 0) {
+    if (prep.roundsDone >= PREP_TOTAL_ROUNDS) return 'done';
+    if (prep.roundsDone > 0 || prep.itemsDone.some(Boolean)) return 'active';
+    return 'active'; // block 0 always starts active
+  }
+  if (id === 1) {
+    if (ivl.rounds >= IVL_TOTAL_ROUNDS) return 'done';
+    if (ivl.rounds > 0 || ivl.running) return 'active';
+    return blockProgress(0) === 'done' ? 'next' : 'next';
+  }
+  if (id === 2) {
+    if (str.sets.length >= 1) return 'active';
+    return ivl.rounds >= IVL_TOTAL_ROUNDS ? 'next' : 'later';
+  }
+}
+
+function updateRail() {
+  BLOCKS.forEach(b => {
+    const status = blockProgress(b.id);
+    const el = document.getElementById('rail' + b.id);
+    el.className = 'rail-block ' + status;
+  });
+
+  // "you are here" text
+  const activeId = BLOCKS.findIndex(b => blockProgress(b.id) === 'active');
+  const active = BLOCKS[activeId] || BLOCKS[BLOCKS.length-1];
+  const next   = BLOCKS[activeId+1];
+
+  document.getElementById('rcHere').textContent = active.label;
+  document.getElementById('rcNext').textContent = next ? next.label : '— Finish';
+
+  // Overall % done
+  let totalSteps = PREP_TOTAL_ROUNDS + IVL_TOTAL_ROUNDS + 1; // 1 strength set = done
+  let doneSteps  = prep.roundsDone + ivl.rounds + (str.sets.length > 0 ? 1 : 0);
+  const pct = Math.round((doneSteps / totalSteps) * 100);
+  document.getElementById('rcPct').textContent = pct;
+}
+
+function scrollToBlock(id) {
+  document.getElementById('block' + id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ══════════════════════════════════════════
+//  BLOCK 1: PREP
+// ══════════════════════════════════════════
+function tapPrepItem(idx) {
+  if (prep.roundsDone >= PREP_TOTAL_ROUNDS) return;
+
+  prep.itemsDone[idx] = !prep.itemsDone[idx];
+  const item = document.getElementById('pi' + idx);
+  const chk  = document.getElementById('pic' + idx);
+
+  item.classList.toggle('item-done', prep.itemsDone[idx]);
+
+  // pop animation
+  chk.classList.remove('popping');
+  void chk.offsetWidth;
+  chk.classList.add('popping');
+
+  const doneCount = prep.itemsDone.filter(Boolean).length;
+  const fillPct   = (doneCount / 3) * 100;
+
+  // Update mini bar
+  document.getElementById('rarFill').style.width = fillPct + '%';
+
+  // Update round advance text
+  const remaining = 3 - doneCount;
+  const textEl = document.getElementById('rarText');
+  if (remaining === 0) {
+    textEl.textContent = 'All 3 done — complete the round';
+  } else {
+    textEl.textContent = `${remaining} more to complete this round`;
+  }
+
+  // Enable/disable button
+  const btn = document.getElementById('rarBtn');
+  btn.disabled = doneCount < 3;
+
+  updatePrepItemPips();
+  updateCta();
+  updateRail();
+}
+
+function updatePrepItemPips() {
+  for (let i = 0; i < 3; i++) {
+    for (let r = 0; r < 2; r++) {
+      const pip = document.getElementById(`pi${i}-r${r}`);
+      if (!pip) continue;
+      pip.classList.remove('done','cur');
+      if (r < prep.roundsDone)  pip.classList.add('done');
+      else if (r === prep.roundsDone) pip.classList.add('cur');
+    }
+  }
+}
+
+function advancePrepRound() {
+  if (prep.itemsDone.filter(Boolean).length < 3) return;
+  prep.roundsDone++;
+
+  if (prep.roundsDone >= PREP_TOTAL_ROUNDS) {
+    // Prep DONE
+    refreshPrepDoneState();
+  } else {
+    // Reset for next round
+    prep.itemsDone = [false, false, false];
+    prep.round = prep.roundsDone + 1;
+    for (let i = 0; i < 3; i++) {
+      document.getElementById('pi'+i).classList.remove('item-done');
+    }
+    document.getElementById('rarFill').style.width = '0%';
+    document.getElementById('rarText').textContent = 'Check off all 3 exercises to complete the round';
+    document.getElementById('rarBtn').disabled = true;
+    document.getElementById('prepRoundLbl').textContent = prep.round;
+  }
+
+  // Round dots
+  for (let r = 0; r < 2; r++) {
+    const d = document.getElementById('prd' + r);
+    d.classList.remove('done','current');
+    if (r < prep.roundsDone) d.classList.add('done');
+    else if (r === prep.roundsDone && prep.roundsDone < PREP_TOTAL_ROUNDS) d.classList.add('current');
+  }
+
+  // Ring
+  const ring = document.getElementById('b0ring');
+  ring.textContent = prep.roundsDone + '/' + PREP_TOTAL_ROUNDS;
+  if (prep.roundsDone >= PREP_TOTAL_ROUNDS) {
+    ring.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+  }
+
+  updatePrepItemPips();
+  updateCta();
+  updateRail();
+}
+
+function refreshPrepDoneState() {
+  const card = document.getElementById('block0');
+  card.classList.add('is-done'); card.classList.remove('is-active');
+  const btn = document.getElementById('rarBtn');
+  btn.textContent = '✓ Prep Complete';
+  btn.classList.add('all-done');
+  btn.disabled = true;
+  document.getElementById('rarText').textContent = '2 rounds complete — great work';
+  document.getElementById('rarFill').style.width = '100%';
+}
+
+// ══════════════════════════════════════════
+//  BLOCK 2: INTERVAL
+// ══════════════════════════════════════════
+function ivlToggle() {
+  ivl.running = !ivl.running;
+  const btn = document.getElementById('ivlStartBtn');
+  if (ivl.running) {
+    btn.innerHTML = `<svg viewBox="0 0 24 24" style="fill:#0c0c0d"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg> Pause`;
+    ivl.timerRef = setInterval(ivlTick, 1000);
+  } else {
+    clearInterval(ivl.timerRef);
+    btn.innerHTML = `<svg viewBox="0 0 24 24" style="fill:#0c0c0d"><polygon points="5 3 19 12 5 21 5 3"/></svg> Resume`;
+  }
+  document.getElementById('block1').classList.add('is-active');
+  updateRail(); updateCta();
+}
+
+function ivlTick() {
+  ivl.sec--;
+  if (ivl.sec < 0) {
+    if (ivl.phase === 'work') {
+      ivl.phase = 'rest'; ivl.sec = IVL_REST;
+    } else {
+      ivl.rounds++;
+      markIvlRound(ivl.rounds - 1);
+      if (ivl.rounds >= IVL_TOTAL_ROUNDS) {
+        clearInterval(ivl.timerRef); ivl.running = false;
+        document.getElementById('ivlClock').textContent = 'Done';
+        document.getElementById('ivlPhase').textContent = 'Complete';
+        document.getElementById('ivlPhase').className = 'ivl-phase idle';
+        document.getElementById('ivlStartBtn').innerHTML = `<svg viewBox="0 0 24 24" style="fill:#0c0c0d"><polygon points="5 3 19 12 5 21 5 3"/></svg> Done`;
+        document.getElementById('block1').classList.add('is-done');
+        document.getElementById('b1ring').innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+        updateRail(); updateCta(); return;
+      }
+      ivl.phase = 'work'; ivl.sec = IVL_WORK;
+    }
+  }
+
+  const isWork = ivl.phase === 'work';
+  const total  = isWork ? IVL_WORK : IVL_REST;
+  const pct    = (ivl.sec / total) * 100;
+
+  const clock = document.getElementById('ivlClock');
+  const phase = document.getElementById('ivlPhase');
+  const bar   = document.getElementById('ivlBar');
+  const info  = document.getElementById('ivlRndInfo');
+
+  clock.textContent = '0:' + String(ivl.sec).padStart(2,'0');
+  clock.className   = 'ivl-clock ' + (ivl.sec <= 5 ? 'warning' : ivl.phase);
+  phase.textContent = isWork ? 'Work' : 'Rest';
+  phase.className   = 'ivl-phase ' + ivl.phase;
+  bar.style.width   = pct + '%';
+  bar.className     = 'ivl-bar-fill ' + ivl.phase;
+  info.textContent  = `Round ${Math.min(ivl.rounds+1, IVL_TOTAL_ROUNDS)} of ${IVL_TOTAL_ROUNDS} · ${isWork?'Work':'Rest'}`;
+}
+
+function ivlReset() {
+  clearInterval(ivl.timerRef);
+  ivl.running = false; ivl.phase = 'work'; ivl.sec = IVL_WORK; ivl.rounds = 0;
+
+  document.getElementById('ivlClock').textContent = '0:30';
+  document.getElementById('ivlClock').className   = 'ivl-clock';
+  document.getElementById('ivlPhase').textContent = 'Ready';
+  document.getElementById('ivlPhase').className   = 'ivl-phase idle';
+  document.getElementById('ivlBar').style.width   = '100%';
+  document.getElementById('ivlBar').className     = 'ivl-bar-fill work';
+  document.getElementById('ivlRndInfo').textContent = 'Round 1 of 3 · 3 exercises';
+  document.getElementById('ivlStartBtn').innerHTML = `<svg viewBox="0 0 24 24" style="fill:#0c0c0d"><polygon points="5 3 19 12 5 21 5 3"/></svg> Start`;
+  document.getElementById('b1ring').textContent = '0/3';
+  document.getElementById('block1').classList.remove('is-done','is-active');
+
+  for (let i=0;i<3;i++) {
+    const b = document.getElementById('irb'+i);
+    b.classList.remove('done','current');
+    if (i===0) b.classList.add('current');
+  }
+  updateRail(); updateCta();
+}
+
+function markIvlRound(idx) {
+  ivl.rounds = Math.max(ivl.rounds, idx+1);
+  for (let i=0;i<3;i++) {
+    const b = document.getElementById('irb'+i);
+    b.classList.remove('done','current');
+    if (i < ivl.rounds) b.classList.add('done');
+    else if (i === ivl.rounds && ivl.rounds < IVL_TOTAL_ROUNDS) b.classList.add('current');
+  }
+  const ring = document.getElementById('b1ring');
+  if (ivl.rounds >= IVL_TOTAL_ROUNDS) {
+    ring.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+    document.getElementById('block1').classList.add('is-done');
+  } else {
+    ring.textContent = ivl.rounds + '/' + IVL_TOTAL_ROUNDS;
+  }
+  updateRail(); updateCta();
+}
+
+// ══════════════════════════════════════════
+//  BLOCK 3: STRENGTH
+// ══════════════════════════════════════════
+function adj(id, delta) {
+  const el = document.getElementById(id);
+  el.value = Math.max(0, (parseFloat(el.value)||0) + delta);
+}
+
+function logStrSet() {
+  const w = parseFloat(document.getElementById('wIn').value)||0;
+  const r = parseInt(document.getElementById('rIn').value)||0;
+  if (!w || !r) return;
+
+  const n = str.sets.length + 1;
+  str.sets.push({weight:w, reps:r});
+
+  const container = document.getElementById('strSets');
+  const row = document.createElement('div');
+  row.className = 'ss-row'; row.id = 'ss-'+( n-1);
+  row.innerHTML = `
+    <div class="ss-num">Build ${n}</div>
+    <div class="ss-wt">${w} <span style="font-size:11px;color:var(--text3)">lb</span></div>
+    <div class="ss-reps">${r} rep${r!==1?'s':''}</div>
+    <button class="ss-rm" onclick="removeSet(${n-1})">✕</button>`;
+  container.appendChild(row);
+
+  // suggest next weight
+  document.getElementById('wIn').value = Math.round((w+10)/5)*5;
+
+  // Update ring
+  const ring = document.getElementById('b2ring');
+  ring.textContent = n;
+  document.getElementById('block2').classList.add('is-active');
+
+  updateRail(); updateCta();
+}
+
+function removeSet(idx) {
+  const el = document.getElementById('ss-'+idx);
+  if (el) { el.style.opacity='0.4'; el.style.pointerEvents='none'; }
+}
+
+// ══════════════════════════════════════════
+//  ADAPTIVE CTA
+// ══════════════════════════════════════════
+function activeBlockId() {
+  if (prep.roundsDone < PREP_TOTAL_ROUNDS) return 0;
+  if (ivl.rounds < IVL_TOTAL_ROUNDS)       return 1;
+  return 2;
+}
+
+function updateCta() {
+  const aid  = activeBlockId();
+  const btn  = document.getElementById('ctaBtn');
+  const lbl  = document.getElementById('ctaLabel');
+  const icon = document.getElementById('ctaIcon');
+  const dot  = document.getElementById('cnh-dot');
+  const hint = document.getElementById('cnh-label');
+  const next = document.getElementById('cnh-next');
+
+  if (aid === 0) {
+    btn.className = 'cta-btn cta-prep';
+    dot.style.background = 'var(--green)';
+    const allChecked = prep.itemsDone.every(Boolean);
+    if (allChecked) {
+      lbl.textContent = `Complete Round ${prep.roundsDone + 1}`;
+      icon.innerHTML  = `<polyline points="20 6 9 17 4 12"/>`;
+    } else {
+      const remaining = prep.itemsDone.filter(Boolean).length;
+      lbl.textContent = remaining === 0
+        ? `Start Round ${prep.roundsDone + 1}`
+        : `${remaining} of 3 — keep going`;
+      icon.innerHTML  = remaining === 0
+        ? `<polygon points="5 3 19 12 5 21 5 3"/>`
+        : `<polyline points="20 6 9 17 4 12"/>`;
+    }
+    hint.textContent = `Hip Prep · Round ${prep.roundsDone+1} of ${PREP_TOTAL_ROUNDS}`;
+    next.textContent = 'Glute Activation';
+
+  } else if (aid === 1) {
+    btn.className = 'cta-btn cta-interval';
+    dot.style.background = 'var(--orange)';
+    if (ivl.rounds >= IVL_TOTAL_ROUNDS) {
+      lbl.textContent = 'All 3 Rounds Done ✓';
+      icon.innerHTML  = `<polyline points="20 6 9 17 4 12"/>`;
+    } else {
+      lbl.textContent = ivl.running ? 'Timer Running'
+        : ivl.rounds > 0 ? 'Resume Timer'
+        : 'Start Interval';
+      icon.innerHTML  = ivl.running
+        ? `<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>`
+        : `<polygon points="5 3 19 12 5 21 5 3"/>`;
+    }
+    hint.textContent = `Glute Activation · Round ${ivl.rounds+1} of ${IVL_TOTAL_ROUNDS}`;
+    next.textContent = 'Back Squat';
+
+  } else {
+    btn.className = 'cta-btn cta-strength';
+    dot.style.background = 'var(--blue)';
+    lbl.textContent = str.sets.length === 0 ? 'Log First Build Set' : `Log Next Set (Build ${str.sets.length+1})`;
+    icon.innerHTML  = `<polyline points="20 6 9 17 4 12"/>`;
+    hint.textContent = `Back Squat · ${str.sets.length} sets logged`;
+    next.textContent = '— Finish';
+  }
+}
+
+function ctaAction() {
+  const aid = activeBlockId();
+  if (aid === 0) {
+    const allChecked = prep.itemsDone.every(Boolean);
+    if (allChecked) {
+      advancePrepRound();
+    } else {
+      // tap the next unchecked item
+      const idx = prep.itemsDone.findIndex(d => !d);
+      if (idx !== -1) tapPrepItem(idx);
+    }
+  } else if (aid === 1) {
+    if (ivl.rounds < IVL_TOTAL_ROUNDS) ivlToggle();
+  } else {
+    logStrSet();
+  }
+}
+
+function skipBlock() {
+  const aid = activeBlockId();
+  if (aid === 0) { prep.roundsDone = PREP_TOTAL_ROUNDS; refreshPrepDoneState(); }
+  else if (aid === 1) { while (ivl.rounds < IVL_TOTAL_ROUNDS) markIvlRound(ivl.rounds); }
+  updateRail(); updateCta();
+}
+
+// ══════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════
+updateRail();
+updateCta();
+</script>
+</body>
+</html>
