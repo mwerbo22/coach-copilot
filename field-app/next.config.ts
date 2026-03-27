@@ -4,6 +4,15 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/athlete',
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
