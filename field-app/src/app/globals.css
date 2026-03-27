@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS — Field App
+═══════════════════════════════════════════════ */
+:root {
+  /* Surfaces */
+  --bg:         #0a0a0b;
+  --s1:         #111114;
+  --s2:         #161619;
+  --s3:         #1e1e23;
+  --s4:         #26262d;
+
+  /* Borders */
+  --border:     rgba(255,255,255,0.07);
+  --border2:    rgba(255,255,255,0.04);
+
+  /* Text */
+  --text:       #f0f0f2;
+  --text2:      #82818c;
+  --text3:      #46454f;
+  --text4:      #272630;
+
+  /* Primary accent */
+  --lime:       #c9f13d;
+  --lime-dk:    #9bbf25;
+  --lime-dim:   rgba(201,241,61,0.11);
+  --lime-glow:  rgba(201,241,61,0.20);
+
+  /* Block colours */
+  --green:      #34d399;
+  --green-dim:  rgba(52,211,153,0.10);
+  --orange:     #fb923c;
+  --orange-dim: rgba(251,146,60,0.10);
+  --blue:       #60a5fa;
+  --blue-dim:   rgba(96,165,250,0.10);
+
+  /* Semantic */
+  --rose:       #f87171;
+  --rose-dim:   rgba(248,113,113,0.10);
+  --gold:       #d4a84b;
+  --gold-dim:   rgba(212,168,75,0.12);
+  --teal:       #4ec9b0;
+  --teal-dim:   rgba(78,201,176,0.10);
+  --purple:     #b78aff;
+  --purple-dim: rgba(183,138,255,0.10);
+
+  /* Typography */
+  --ff:   'Barlow', sans-serif;
+  --ffc:  'Barlow Condensed', sans-serif;
+  --ffs:  'Instrument Serif', serif;
+  --ffm:  'DM Mono', monospace;
+
+  /* Radii */
+  --r:    14px;
+  --rsm:  8px;
+  --rxs:  5px;
+
+  /* Layout */
+  --nav-h:  72px;
+  --nav-w:  220px; /* coach sidebar */
+}
+
+/* ═══════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--ff);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════════
+   TAILWIND THEME EXTENSION
+═══════════════════════════════════════════════ */
+@theme inline {
+  --color-bg:          var(--bg);
+  --color-s1:          var(--s1);
+  --color-s2:          var(--s2);
+  --color-s3:          var(--s3);
+  --color-s4:          var(--s4);
+  --color-text:        var(--text);
+  --color-text2:       var(--text2);
+  --color-text3:       var(--text3);
+  --color-lime:        var(--lime);
+  --color-lime-dk:     var(--lime-dk);
+  --color-green:       var(--green);
+  --color-orange:      var(--orange);
+  --color-blue:        var(--blue);
+  --color-rose:        var(--rose);
+  --color-gold:        var(--gold);
+  --color-teal:        var(--teal);
+  --color-purple:      var(--purple);
+  --color-border:      var(--border);
+  --font-sans:         'Barlow', sans-serif;
+  --font-condensed:    'Barlow Condensed', sans-serif;
+  --font-serif:        'Instrument Serif', serif;
+  --font-mono:         'DM Mono', monospace;
+  --font-dm-sans:      'DM Sans', sans-serif;
+  --font-syne:         'Syne', sans-serif;
+  --radius-sm:         var(--rsm);
+  --radius-xs:         var(--rxs);
+  --radius:            var(--r);
+}
+
+/* ═══════════════════════════════════════════════
+   COACH PORTAL THEME OVERRIDES
+   Scoped to [data-theme="coach"] — replaces the
+   athlete-derived defaults with the original
+   coach portal color/font/radius system.
+═══════════════════════════════════════════════ */
+[data-theme="coach"] {
+  /* Surfaces — warmer, darker */
+  --bg:  #0f0f10;
+  --s1:  #17171a;
+  --s2:  #1e1e22;
+  --s3:  #26262c;
+  --s4:  #2e2e36;
+
+  /* Borders — solid (not rgba) */
+  --border:    #2a2a32;
+  --border2:   #2a2a32;
+  --border-lt: #36363f;
+
+  /* Text */
+  --text:  #e8e8ec;
+  --text2: #72727e;
+  --text3: #46454f;
+  --text4: #28272f;
+
+  /* Accent (very close, just align) */
+  --lime:      #c8f53e;
+  --lime-dim:  rgba(200,245,62,0.11);
+  --lime-glow: rgba(200,245,62,0.20);
+
+  /* Block colours */
+  --teal:       #3dd9c1;
+  --teal-dim:   rgba(61,217,193,0.11);
+  --blue:       #4fa3ff;
+  --blue-dim:   rgba(79,163,255,0.11);
+  --orange:     #ff9940;
+  --orange-dim: rgba(255,153,64,0.11);
+  --purple-dim: rgba(183,138,255,0.11);
+  --rose-dim:   rgba(255,94,87,0.12);
+
+  /* Typography — coach uses DM Sans + Syne */
+  --ff:  'DM Sans', sans-serif;
+  --ffc: 'Syne', sans-serif;
+
+  /* Radii — tighter than athlete app */
+  --r:   8px;
+  --rsm: 6px;
+  --rxs: 4px;
+
+  /* Apply base font so all children inherit coach fonts */
+  font-family: var(--ff);
+  font-size: 13px;
+}
